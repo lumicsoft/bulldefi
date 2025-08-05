@@ -6,7 +6,8 @@
     <title>Bulldefi Dashboard</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.1/ethers.umd.min.js"></script>
-
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+    
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
         .container { max-width: 1000px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -25,7 +26,7 @@
 
 <div class="container">
     <h1>Bulldefi User Dashboard</h1>
-    <p>Connect your MetaMask wallet and view your contract data.</p>
+    <p>Connect your MetaMask wallet or any other mobile wallet.</p>
     <button id="connectButton">Connect Wallet</button>
     <button id="fetchMyDataButton" style="display:none;">Fetch My Data</button>
 
@@ -54,6 +55,7 @@
     let userAddress;
 
     document.getElementById('connectButton').addEventListener('click', async () => {
+        // Desktop (MetaMask) ke liye check karein
         if (typeof window.ethereum !== 'undefined') {
             try {
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -69,8 +71,32 @@
                 console.error("User denied account access or another error occurred:", error);
                 alert("Could not connect to wallet. Please ensure MetaMask is installed and unlocked.");
             }
-        } else {
-            alert("MetaMask is not installed. Please install it to use this DApp.");
+        } 
+        // Mobile (WalletConnect) ke liye check karein
+        else {
+            try {
+                // NEW: WalletConnect provider ko setup karein
+                const walletConnectProvider = new WalletConnectProvider.default({
+                    infuraId: "YOUR_INFURA_PROJECT_ID", // Yahan apna Infura ID daalein
+                    // Yahan aur bhi network settings add ki ja sakti hain
+                });
+
+                // NEW: Connection start karein
+                await walletConnectProvider.enable();
+
+                // NEW: Ethers.js provider aur signer ko update karein
+                provider = new ethers.providers.Web3Provider(walletConnectProvider);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+                document.getElementById('connectButton').innerText = `Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+                document.getElementById('fetchMyDataButton').style.display = 'inline-block';
+                document.getElementById('dataDisplay').innerHTML = `<p>Wallet connected. Click "Fetch My Data" to see your details.</p>`;
+            } catch (error) {
+                console.error("WalletConnect connection error:", error);
+                alert("Could not connect via WalletConnect. Please make sure you have a mobile wallet installed.");
+            }
         }
     });
 
@@ -92,11 +118,9 @@
         const idInput = document.getElementById('idInput').value;
         let targetAddress = null;
 
-        // Check if an address is entered and is valid
         if (addressInput && ethers.utils.isAddress(addressInput)) {
             targetAddress = addressInput;
         } 
-        // If not, check if a user ID is entered
         else if (idInput) {
             try {
                 targetAddress = await contract.getAddressFromUserId(parseInt(idInput));
@@ -164,7 +188,7 @@
             }
 
             const displayDiv = document.getElementById('dataDisplay');
-            displayDiv.innerHTML = ''; // Clear previous data
+            displayDiv.innerHTML = ''; 
             
             const formatHistory = (history, incomeType) => {
                 if (history.length === 0) return `<p>No ${incomeType} history found.</p>`;
@@ -288,7 +312,7 @@
             
         } catch (error) {
             console.error("Error fetching data:", error);
-            document.getElementById('dataDisplay').innerHTML = `<p style="color:red;">Error fetching data. Please ensure the address or ID is correct and the user is registered. Check the console for more details.</p>`;
+            document.getElementById('dataDisplay').innerHTML = `<p style="color:red;">Data fetch karne mein error. Kripya thodi der baad dobara koshish karein ya network connection check karein. Error details console mein dekhen.</p>`;
         }
     }
 </script>
