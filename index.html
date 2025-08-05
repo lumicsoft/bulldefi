@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bulldefi Dashboard</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.1/ethers.umd.min.js"></script>
+
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
         .container { max-width: 1000px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -17,7 +20,6 @@
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
     </style>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
 </head>
 <body>
 
@@ -121,7 +123,6 @@
                 userIncomeDetails,
                 userId,
                 directReferrals,
-                totalTeamCount,
                 totalEarned,
                 totalMissed,
                 todayEarned,
@@ -140,7 +141,6 @@
                 contract.getUserIncomeDetails(targetAddress),
                 contract.getUserId(targetAddress),
                 contract.getUserDirectReferrals(targetAddress),
-                contract.getTeamCount(targetAddress, 20),
                 contract.getTotalEarnedIncome(targetAddress),
                 contract.getTotalMissedIncome(targetAddress),
                 contract.getTodayEarnedIncome(targetAddress),
@@ -233,7 +233,6 @@
                     <h3>Team Details</h3>
                     <p><strong>Direct Referrals (${directReferrals.length}):</strong></p>
                     ${directRefsHtml}
-                    <p><strong>Total Team (up to 20 levels):</strong> ${totalTeamCount.toString()}</p>
                 </div>
             `;
 
