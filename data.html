@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulldefi Dashboard</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 1000px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #333; }
+        button { background-color: #007BFF; color: white; border: none; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px; }
+        #dataDisplay { margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
+        .data-section { background-color: #e9e9e9; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .search-section { margin-top: 30px; padding: 20px; border: 2px dashed #007BFF; border-radius: 8px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 8px; margin: 8px 0; display: inline-block; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Bulldefi User Dashboard</h1>
+    <p>Connect your MetaMask wallet and view your contract data.</p>
+    <button id="connectButton">Connect Wallet</button>
+    <button id="fetchMyDataButton" style="display:none;">Fetch My Data</button>
+
+    <div class="search-section">
+        <h3>Search for another user</h3>
+        <p>Enter a wallet address or user ID to view their data.</p>
+        <label for="addressInput">Wallet Address:</label>
+        <input type="text" id="addressInput" placeholder="0x... or 1-10000000">
+        <label for="idInput">User ID:</label>
+        <input type="number" id="idInput" placeholder="User ID">
+        <button id="fetchOtherDataButton">Fetch User Data</button>
+    </div>
+
+    <div id="dataDisplay">
+        </div>
+</div>
+
+<script>
+    const CONTRACT_ADDRESS = "0xYourContractAddressHere"; // <-- Apna Contract Address Daalein
+    
+    // Yahan par aap apne compiled contract ka pura ABI JSON paste karein
+    const CONTRACT_ABI = [
+        //... Paste your contract's ABI array here
+    ];
+
+    let provider;
+    let signer;
+    let contract;
+    let userAddress;
+
+    document.getElementById('connectButton').addEventListener('click', async () => {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+                document.getElementById('connectButton').innerText = `Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+                document.getElementById('fetchMyDataButton').style.display = 'inline-block';
+                document.getElementById('dataDisplay').innerHTML = `<p>Wallet connected. Click "Fetch My Data" to see your details.</p>`;
+            } catch (error) {
+                console.error("User denied account access or another error occurred:", error);
+                alert("Could not connect to wallet. Please ensure MetaMask is installed and unlocked.");
+            }
+        } else {
+            alert("MetaMask is not installed. Please install it to use this DApp.");
+        }
+    });
+
+    document.getElementById('fetchMyDataButton').addEventListener('click', () => {
+        if (!contract) {
+            alert("Please connect your wallet first.");
+            return;
+        }
+        fetchAndDisplayData(userAddress);
+    });
+
+    document.getElementById('fetchOtherDataButton').addEventListener('click', async () => {
+        if (!contract) {
+            alert("Please connect your wallet first.");
+            return;
+        }
+
+        const addressInput = document.getElementById('addressInput').value;
+        const idInput = document.getElementById('idInput').value;
+        let targetAddress = null;
+
+        if (addressInput && ethers.utils.isAddress(addressInput)) {
+            targetAddress = addressInput;
+        } else if (idInput) {
+            try {
+                targetAddress = await contract.getAddressFromUserId(parseInt(idInput));
+                if (targetAddress === "0x0000000000000000000000000000000000000000") {
+                    alert("Invalid User ID or user not found.");
+                    return;
+                }
+            } catch (error) {
+                console.error("Error fetching address from User ID:", error);
+                alert("Invalid User ID or user not found.");
+                return;
+            }
+        } else {
+            alert("Please enter a valid wallet address or a user ID.");
+            return;
+        }
+        fetchAndDisplayData(targetAddress);
+    });
+
+    async function fetchAndDisplayData(targetAddress) {
+        try {
+            document.getElementById('dataDisplay').innerHTML = `<h2>Fetching Data for ${targetAddress}...</h2>`;
+            
+            // Fetch all data
+            const [
+                userIncomeDetails,
+                userId,
+                directReferrals,
+                totalTeamCount,
+                totalEarned,
+                totalMissed,
+                todayEarned,
+                todayMissed,
+                availableDrain,
+                availableXTokens,
+                purchasedPackages,
+                directHistory,
+                missedDirectHistory,
+                containerHistory,
+                missedContainerHistory,
+                drainHistory,
+                missedDrainHistory
+            ] = await Promise.all([
+                contract.getUserIncomeDetails(targetAddress),
+                contract.getUserId(targetAddress),
+                contract.getUserDirectReferrals(targetAddress),
+                contract.getTeamCount(targetAddress, 20),
+                contract.getTotalEarnedIncome(targetAddress),
+                contract.getTotalMissedIncome(targetAddress),
+                contract.getTodayEarnedIncome(targetAddress),
+                contract.getTodayMissedIncome(targetAddress),
+                contract.getClaimableDrainBalance(targetAddress),
+                contract.getClaimableXTokensGlobalDownline(targetAddress),
+                contract.getUserPurchasedPackages(targetAddress),
+                contract.getUserDirectIncomeHistory(targetAddress),
+                contract.getUserMissedDirectHistory(targetAddress),
+                contract.getUserContainerIncomeHistory(targetAddress),
+                contract.getUserMissedContainerHistory(targetAddress),
+                contract.getUserDrainIncomeHistory(targetAddress),
+                contract.getUserMissedDrainHistory(targetAddress)
+            ]);
+
+            const displayDiv = document.getElementById('dataDisplay');
+            displayDiv.innerHTML = ''; // Clear previous data
+            
+            // Helper function to format income history
+            const formatHistory = (history, incomeType) => {
+                if (history.length === 0) return `<p>No ${incomeType} history found.</p>`;
+                let html = `<table><thead><tr><th>Amount</th><th>Timestamp</th><th>From Address</th><th>Package ID</th></tr></thead><tbody>`;
+                history.forEach(record => {
+                    html += `<tr>
+                        <td>${ethers.utils.formatUnits(record.amount, 6)} BUSD</td>
+                        <td>${new Date(record.timestamp * 1000).toLocaleString()}</td>
+                        <td>${record.fromAddress}</td>
+                        <td>${record.packageId.toString()}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+                return html;
+            };
+
+            const formatMissedHistory = (history, incomeType) => {
+                if (history.length === 0) return `<p>No ${incomeType} history found.</p>`;
+                let html = `<table><thead><tr><th>Amount</th><th>Timestamp</th><th>From Address</th><th>Package ID</th><th>Actual Recipient</th></tr></thead><tbody>`;
+                history.forEach(record => {
+                    html += `<tr>
+                        <td>${ethers.utils.formatUnits(record.amount, 6)} BUSD</td>
+                        <td>${new Date(record.timestamp * 1000).toLocaleString()}</td>
+                        <td>${record.fromAddress}</td>
+                        <td>${record.packageId.toString()}</td>
+                        <td>${record.actualRecipient}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+                return html;
+            };
+
+            // Section 1: Summary
+            displayDiv.innerHTML += `
+                <div class="data-section">
+                    <h3>Summary for User: ${targetAddress}</h3>
+                    <p><strong>User ID:</strong> ${userId.toString()}</p>
+                    <p><strong>Total Income:</strong> ${ethers.utils.formatUnits(totalEarned[4], 6)} BUSD</p>
+                    <p><strong>Total Missed Income:</strong> ${ethers.utils.formatUnits(totalMissed, 6)} BUSD</p>
+                    <p><strong>Today's Income:</strong> ${ethers.utils.formatUnits(todayEarned[4], 6)} BUSD</p>
+                    <p><strong>Today's Missed Income:</strong> ${ethers.utils.formatUnits(todayMissed[3], 6)} BUSD</p>
+                </div>
+            `;
+
+            // Section 2: Wallet Balances
+            displayDiv.innerHTML += `
+                <div class="data-section">
+                    <h3>Available Balances</h3>
+                    <p><strong>Claimable Drain Withdrawal Balance:</strong> ${ethers.utils.formatUnits(availableDrain, 6)} BUSD</p>
+                    <p><strong>Claimable XToken (Global Downline) Balance:</strong> ${ethers.utils.formatUnits(availableXTokens, 18)} BDF</p>
+                </div>
+            `;
+
+            // Section 3: Income Totals
+            displayDiv.innerHTML += `
+                <div class="data-section">
+                    <h3>Detailed Income Totals</h3>
+                    <p><strong>Total Direct Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalDirectIncome, 6)} BUSD</p>
+                    <p><strong>Total Container Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalContainerIncome, 6)} BUSD</p>
+                    <p><strong>Total Drain Income:</strong> (History se dekhein)</p>
+                    <p><strong>Total Self Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalSelfIncome, 6)} BUSD</p>
+                    <p><strong>Total Missed Direct Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedDirect, 6)} BUSD</p>
+                    <p><strong>Total Missed Container Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedContainer, 6)} BUSD</p>
+                    <p><strong>Total Missed Drain Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedDrain, 6)} BUSD</p>
+                </div>
+            `;
+            
+            // Section 4: Team Details
+            const directRefsHtml = directReferrals.length > 0 ? `<ul>${directReferrals.map(ref => `<li>${ref}</li>`).join('')}</ul>` : `<p>No direct referrals found.</p>`;
+            displayDiv.innerHTML += `
+                <div class="data-section">
+                    <h3>Team Details</h3>
+                    <p><strong>Direct Referrals (${directReferrals.length}):</strong></p>
+                    ${directRefsHtml}
+                    <p><strong>Total Team (up to 20 levels):</strong> ${totalTeamCount.toString()}</p>
+                </div>
+            `;
+
+            // Section 5: Package Details
+            if (purchasedPackages.length > 0) {
+                let packagesHtml = '';
+                for (const pkgId of purchasedPackages) {
+                    const round = await contract.getUserContainerRound(targetAddress, pkgId);
+                    const slots = await contract.getUserContainerSpots(targetAddress, pkgId);
+                    const filledSlots = slots.filter(slot => slot == 1).length;
+                    
+                    packagesHtml += `
+                        <h4>Package ID: ${pkgId.toString()}</h4>
+                        <p><strong>Current Container Round:</strong> ${round.toString()}</p>
+                        <p><strong>Container Slots:</strong> ${filledSlots} / 10 filled</p>
+                        <p>Slots Data: [${slots.toString()}]</p>
+                    `;
+                }
+                displayDiv.innerHTML += `
+                    <div class="data-section">
+                        <h3>Packages</h3>
+                        ${packagesHtml}
+                    </div>
+                `;
+            } else {
+                displayDiv.innerHTML += `<div class="data-section"><h3>Packages</h3><p>No packages purchased yet.</p></div>`;
+            }
+
+            // Section 6: Income History
+            displayDiv.innerHTML += `
+                <div class="data-section">
+                    <h3>Income History</h3>
+                    <h4>Direct Income History</h4>
+                    ${formatHistory(directHistory, "Direct Income")}
+                    <h4>Container Income History</h4>
+                    ${formatHistory(containerHistory, "Container Income")}
+                    <h4>Drain Income History</h4>
+                    ${formatHistory(drainHistory, "Drain Income")}
+                </div>
+            `;
+
+            // Section 7: Missed Income History
+            displayDiv.innerHTML += `
+                <div class="data-section">
+                    <h3>Missed Income History</h3>
+                    <h4>Missed Direct Income History</h4>
+                    ${formatMissedHistory(missedDirectHistory, "Missed Direct Income")}
+                    <h4>Missed Container Income History</h4>
+                    ${formatMissedHistory(missedContainerHistory, "Missed Container Income")}
+                    <h4>Missed Drain Income History</h4>
+                    ${formatMissedHistory(missedDrainHistory, "Missed Drain Income")}
+                </div>
+            `;
+            
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            document.getElementById('dataDisplay').innerHTML = `<p style="color:red;">Error fetching data. Please ensure the address or ID is correct and the user is registered. Check the console for more details.</p>`;
+        }
+    }
+</script>
+
+</body>
+</html>
