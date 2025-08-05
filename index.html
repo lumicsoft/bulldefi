@@ -169,7 +169,7 @@
                 let html = `<table><thead><tr><th>Amount</th><th>Timestamp</th><th>From Address</th><th>Package ID</th></tr></thead><tbody>`;
                 history.forEach(record => {
                     html += `<tr>
-                        <td>${ethers.utils.formatUnits(record.amount, 6)} BUSD</td>
+                        <td>${ethers.utils.formatUnits(record.amount, 18)} BUSD</td>
                         <td>${new Date(record.timestamp * 1000).toLocaleString()}</td>
                         <td>${record.fromAddress}</td>
                         <td>${record.packageId.toString()}</td>
@@ -184,7 +184,7 @@
                 let html = `<table><thead><tr><th>Amount</th><th>Timestamp</th><th>From Address</th><th>Package ID</th><th>Actual Recipient</th></tr></thead><tbody>`;
                 history.forEach(record => {
                     html += `<tr>
-                        <td>${ethers.utils.formatUnits(record.amount, 6)} BUSD</td>
+                        <td>${ethers.utils.formatUnits(record.amount, 18)} BUSD</td>
                         <td>${new Date(record.timestamp * 1000).toLocaleString()}</td>
                         <td>${record.fromAddress}</td>
                         <td>${record.packageId.toString()}</td>
@@ -199,17 +199,17 @@
                 <div class="data-section">
                     <h3>Summary for User: ${targetAddress}</h3>
                     <p><strong>User ID:</strong> ${userId.toString()}</p>
-                    <p><strong>Total Income:</strong> ${ethers.utils.formatUnits(totalEarned.grandTotal, 6)} BUSD</p>
-                    <p><strong>Total Missed Income:</strong> ${ethers.utils.formatUnits(totalMissed, 6)} BUSD</p>
-                    <p><strong>Today's Income:</strong> ${ethers.utils.formatUnits(todayEarned.grandTotalToday, 6)} BUSD</p>
-                    <p><strong>Today's Missed Income:</strong> ${ethers.utils.formatUnits(todayMissed.grandTotalMissedToday, 6)} BUSD</p>
+                    <p><strong>Total Income:</strong> ${ethers.utils.formatUnits(totalEarned.grandTotal, 18)} BUSD</p>
+                    <p><strong>Total Missed Income:</strong> ${ethers.utils.formatUnits(totalMissed, 18)} BUSD</p>
+                    <p><strong>Today's Income:</strong> ${ethers.utils.formatUnits(todayEarned.grandTotalToday, 18)} BUSD</p>
+                    <p><strong>Today's Missed Income:</strong> ${ethers.utils.formatUnits(todayMissed.grandTotalMissedToday, 18)} BUSD</p>
                 </div>
             `;
 
             displayDiv.innerHTML += `
                 <div class="data-section">
                     <h3>Available Balances</h3>
-                    <p><strong>Claimable Drain Withdrawal Balance:</strong> ${ethers.utils.formatUnits(availableDrain, 6)} BUSD</p>
+                    <p><strong>Claimable Drain Withdrawal Balance:</strong> ${ethers.utils.formatUnits(availableDrain, 18)} BUSD</p>
                     <p><strong>Claimable XToken (Global Downline) Balance:</strong> ${ethers.utils.formatUnits(availableXTokens, 18)} BDF</p>
                 </div>
             `;
@@ -217,13 +217,13 @@
             displayDiv.innerHTML += `
                 <div class="data-section">
                     <h3>Detailed Income Totals</h3>
-                    <p><strong>Total Direct Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalDirectIncome, 6)} BUSD</p>
-                    <p><strong>Total Container Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalContainerIncome, 6)} BUSD</p>
+                    <p><strong>Total Direct Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalDirectIncome, 18)} BUSD</p>
+                    <p><strong>Total Container Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalContainerIncome, 18)} BUSD</p>
                     <p><strong>Total Drain Income:</strong> (History se dekhein)</p>
-                    <p><strong>Total Self Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalSelfIncome, 6)} BUSD</p>
-                    <p><strong>Total Missed Direct Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedDirect, 6)} BUSD</p>
-                    <p><strong>Total Missed Container Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedContainer, 6)} BUSD</p>
-                    <p><strong>Total Missed Drain Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedDrain, 6)} BUSD</p>
+                    <p><strong>Total Self Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalSelfIncome, 18)} BUSD</p>
+                    <p><strong>Total Missed Direct Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedDirect, 18)} BUSD</p>
+                    <p><strong>Total Missed Container Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedContainer, 18)} BUSD</p>
+                    <p><strong>Total Missed Drain Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedDrain, 18)} BUSD</p>
                 </div>
             `;
             
@@ -293,3 +293,4 @@
 
 </body>
 </html>
+
