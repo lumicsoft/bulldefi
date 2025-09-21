@@ -3,310 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bulldefi Dashboard</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.1/ethers.umd.min.js"></script>
-    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-    
+    <title>My Referral System DApp</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
-        .container { max-width: 1000px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1, h2, h3 { color: #333; }
-        button { background-color: #007BFF; color: white; border: none; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px; }
-        #dataDisplay { margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
-        .data-section { background-color: #e9e9e9; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .search-section { margin-top: 30px; padding: 20px; border: 2px dashed #007BFF; border-radius: 8px; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 8px; margin: 8px 0; display: inline-block; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 30px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 6px; }
+        h2 { border-bottom: 2px solid #333; padding-bottom: 5px; }
+        button { padding: 10px 20px; font-size: 16px; margin-top: 10px; cursor: pointer; background-color: #007BFF; color: white; border: none; border-radius: 4px; }
+        button:hover { background-color: #0056b3; }
+        input[type="text"], input[type="number"] { width: 95%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        #log { background: #f0f0f0; padding: 10px; min-height: 100px; overflow-y: auto; border-radius: 5px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Bulldefi User Dashboard</h1>
-    <p>Connect your MetaMask wallet or any other mobile wallet.</p>
-    <button id="connectButton">Connect Wallet</button>
-    <button id="fetchMyDataButton" style="display:none;">Fetch My Data</button>
-
-    <div class="search-section">
-        <h3>Search for another user</h3>
-        <p>Enter a wallet address or user ID to view their data.</p>
-        <label for="addressInput">Wallet Address:</label>
-        <input type="text" id="addressInput" placeholder="0x... or 1-10000000">
-        <label for="idInput">User ID:</label>
-        <input type="number" id="idInput" placeholder="User ID">
-        <button id="fetchOtherDataButton">Fetch User Data</button>
+    <h1>My Referral System - Testnet</h1>
+    <div class="section">
+        <h2>1. Wallet Connect</h2>
+        <button id="connectBtn">Connect Wallet</button>
+        <p>Connected Address: <span id="userAddress">N/A</span></p>
     </div>
 
-    <div id="dataDisplay">
-        </div>
-</div>
+    <div class="section">
+        <h2>2. Approve Tokens</h2>
+        <p>Before buying a package, you need to approve the contract to spend your tokens.</p>
+        <input type="number" id="packageIdInput" placeholder="Enter Package ID (e.g., 0)">
+        <button id="approveBtn">Approve Tokens for Package</button>
+    </div>
 
-<script>
-    const CONTRACT_ADDRESS = "0xb877490051049544c28Ab2dC5cbD11CE14CAa500";
+    <div class="section">
+        <h2>3. Buy Package</h2>
+        <p>Buy a package using a referrer's address.</p>
+        <input type="text" id="referrerAddressInput" placeholder="Referrer Address (or 0x0 for none)">
+        <input type="number" id="buyPackageIdInput" placeholder="Enter Package ID (0-14)">
+        <button id="joinBtn">Buy Package</button>
+    </div>
     
-    const CONTRACT_ABI = [{"inputs":[{"internalType":"address","name":"_busdTokenAddress","type":"address"},{"internalType":"address","name":"_bdfTokenAddress","type":"address"},{"internalType":"uint256","name":"_initialBdfTokenPrice","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[],"name":"BDFPriceZero","type":"error"},{"inputs":[],"name":"BDFRewardTransferFailed","type":"error"},{"inputs":[],"name":"BUSDTransferFailed","type":"error"},{"inputs":[],"name":"BUSDWithdrawalFailed","type":"error"},{"inputs":[],"name":"InsufficientBUSD","type":"error"},{"inputs":[],"name":"InsufficientContractBDF","type":"error"},{"inputs":[],"name":"InsufficientContractBUSD","type":"error"},{"inputs":[],"name":"InsufficientNativeBalance","type":"error"},{"inputs":[],"name":"InvalidBDFAddress","type":"error"},{"inputs":[],"name":"InvalidBUSDAddress","type":"error"},{"inputs":[],"name":"InvalidPackageID","type":"error"},{"inputs":[],"name":"InvalidRecipientAddress","type":"error"},{"inputs":[],"name":"InvalidTokenAddress","type":"error"},{"inputs":[],"name":"NativeWithdrawFailed","type":"error"},{"inputs":[],"name":"NoDrainToWithdraw","type":"error"},{"inputs":[],"name":"NoXTokensToClaim","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"inputs":[],"name":"PackageAlreadyPurchased","type":"error"},{"inputs":[],"name":"PackageValueZero","type":"error"},{"inputs":[],"name":"ReferrerNotRegistered","type":"error"},{"inputs":[],"name":"SelfReferral","type":"error"},{"inputs":[],"name":"TokenWithdrawFailed","type":"error"},{"inputs":[],"name":"TransfersNotAllowed","type":"error"},{"inputs":[],"name":"UserAlreadyRegistered","type":"error"},{"inputs":[],"name":"UserNotRegistered","type":"error"},{"inputs":[],"name":"XTokenClaimFailed","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"tokenAddress","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"AdminTokenWithdraw","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"AdminWithdraw","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"oldPrice","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"newPrice","type":"uint256"}],"name":"BdfTokenPriceSet","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"packageId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"spotIndex","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"currentContainerRound","type":"uint256"}],"name":"ContainerIncomeTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"packageId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"newRound","type":"uint256"}],"name":"ContainerRecycled","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"userWhoMissed","type":"address"},{"indexed":true,"internalType":"address","name":"sourceUser","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"packageId","type":"uint256"},{"indexed":false,"internalType":"bytes32","name":"incomeType","type":"bytes32"},{"indexed":true,"internalType":"address","name":"actualRecipient","type":"address"},{"indexed":false,"internalType":"bytes32","name":"reason","type":"bytes32"}],"name":"DetailedIncomeMissed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"packageId","type":"uint256"}],"name":"DirectIncomeTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"deductedAmount","type":"uint256"}],"name":"DrainAmountDeducted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sourceUser","type":"address"},{"indexed":true,"internalType":"address","name":"recipient","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"packageId","type":"uint256"}],"name":"DrainIncomeDistributedToReferrals","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"BUSDamount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"bdfTokenReward","type":"uint256"}],"name":"DrainIncomeWithdrawn","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"packageId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"FifthPackageBdfRewardGiven","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"recipient","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"packageId","type":"uint256"},{"indexed":false,"internalType":"bytes32","name":"incomeType","type":"bytes32"},{"indexed":false,"internalType":"address","name":"fromAddress","type":"address"}],"name":"IncomeReceived","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"InitialRewardGiven","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"packageId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"packageValue","type":"uint256"}],"name":"PackagePurchased","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"packageId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"SelfIncomeGiven","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"referrer","type":"address"},{"indexed":false,"internalType":"uint256","name":"userId","type":"uint256"}],"name":"UserRegistered","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"packageId","type":"uint256"},{"indexed":true,"internalType":"address","name":"assigner","type":"address"}],"name":"WhitelistedId","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"XTokenGlobalDownlineClaimed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sourceUser","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"XTokenGlobalDownlineDistributed","type":"event"},{"stateMutability":"nonpayable","type":"fallback"},{"inputs":[],"name":"BDF_TOKEN","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"BDF_TOKEN_REWARD_PERCENT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"BUSD_TOKEN","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"CONTAINER_INCOME_PERCENTAGE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"DIRECT_INCOME_PERCENTAGE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"DRAIN_INCOME_DIRECT_CONTAINER_PERCENT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"FIFTH_PACKAGE_BDF_REWARD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"GLOBAL_DRAIN_DEDUCTION_PERCENT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MAX_1PACKAGE_BDF_REWARD_USERS","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MAX_FIFTH_PACKAGE_REWARD_USERS","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MAX_PACKAGES","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MAX_UPLINE_SEARCH_COUNT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ONE_PACKAGE_BDF_REWARD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TOTAL_CONTAINER_SPOTS","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"bdfTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_packageId","type":"uint256"}],"name":"buyPackage","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"claimXTokensGlobalDownline","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"claimableXTokensGlobalDownline","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"}],"name":"containerRounds","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"containerSpotPercentages","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"fifthPackageRewardRecipientsCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_userId","type":"uint256"}],"name":"getAddressFromUserId","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getClaimableDrainBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getClaimableXTokensGlobalDownline","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_packageId","type":"uint256"}],"name":"getContainerIncomeEarnedByPackage","outputs":[{"internalType":"uint256","name":"total","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getCurrentBdfTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_packageId","type":"uint256"}],"name":"getMissedContainerIncomeByPackage","outputs":[{"internalType":"uint256","name":"total","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_packageId","type":"uint256"}],"name":"getPackageValue","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getTodayEarnedIncome","outputs":[{"internalType":"uint256","name":"totalDirectToday","type":"uint256"},{"internalType":"uint256","name":"totalContainerToday","type":"uint256"},{"internalType":"uint256","name":"totalDrainToday","type":"uint256"},{"internalType":"uint256","name":"grandTotalToday","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getTodayMissedIncome","outputs":[{"internalType":"uint256","name":"totalMissedDirectToday","type":"uint256"},{"internalType":"uint256","name":"totalMissedContainerToday","type":"uint256"},{"internalType":"uint256","name":"totalMissedDrainToday","type":"uint256"},{"internalType":"uint256","name":"grandTotalMissedToday","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getTotalEarnedIncome","outputs":[{"internalType":"uint256","name":"totalDirect","type":"uint256"},{"internalType":"uint256","name":"totalContainer","type":"uint256"},{"internalType":"uint256","name":"totalDrain","type":"uint256"},{"internalType":"uint256","name":"grandTotal","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getTotalMissedIncome","outputs":[{"internalType":"uint256","name":"total","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserContainerIncomeHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"}],"internalType":"struct bulldefi.IncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_packageId","type":"uint256"}],"name":"getUserContainerRound","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_packageId","type":"uint256"}],"name":"getUserContainerSpots","outputs":[{"internalType":"uint8[10]","name":"","type":"uint8[10]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserDirectCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserDirectIncomeHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"}],"internalType":"struct bulldefi.IncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserDirectReferrals","outputs":[{"internalType":"address[]","name":"","type":"address[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserDrainIncomeHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"}],"internalType":"struct bulldefi.IncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserDrainWithdrawalBDFHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"}],"internalType":"struct bulldefi.IncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserDrainWithdrawalBUSDHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"}],"internalType":"struct bulldefi.IncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserFifthPackageBonusHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"}],"internalType":"struct bulldefi.IncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserIncomeDetails","outputs":[{"components":[{"internalType":"uint256","name":"totalDirectIncome","type":"uint256"},{"internalType":"uint256","name":"totalContainerIncome","type":"uint256"},{"internalType":"uint256","name":"totalDrainIncomeClaimable","type":"uint256"},{"internalType":"uint256","name":"totalSelfIncome","type":"uint256"},{"internalType":"uint256","name":"totalMissedDirect","type":"uint256"},{"internalType":"uint256","name":"totalMissedContainer","type":"uint256"},{"internalType":"uint256","name":"totalMissedDrain","type":"uint256"},{"internalType":"uint256","name":"totalXTokensGlobalDownlineClaimable","type":"uint256"},{"internalType":"uint256[]","name":"purchasedPackageIds","type":"uint256[]"},{"internalType":"uint256","name":"directCount","type":"uint256"}],"internalType":"struct bulldefi.UserIncomeDetails","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserIncomeHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"}],"internalType":"struct bulldefi.IncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserInitialRewardHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"}],"internalType":"struct bulldefi.IncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserMissedContainerHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"},{"internalType":"address","name":"actualRecipient","type":"address"}],"internalType":"struct bulldefi.MissedIncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserMissedDirectHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"},{"internalType":"address","name":"actualRecipient","type":"address"}],"internalType":"struct bulldefi.MissedIncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserMissedDrainHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"},{"internalType":"address","name":"actualRecipient","type":"address"}],"internalType":"struct bulldefi.MissedIncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserMissedIncomeHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"},{"internalType":"address","name":"actualRecipient","type":"address"}],"internalType":"struct bulldefi.MissedIncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_packageId","type":"uint256"}],"name":"getUserNextEmptyContainerSpotIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"},{"internalType":"uint256","name":"_packageId","type":"uint256"}],"name":"getUserPtimestamp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserPurchasedPackages","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserReferrer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserSelfIncomeHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"}],"internalType":"struct bulldefi.IncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserTotalMissedContainerIncome","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserTotalMissedDirectIncome","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserTotalMissedDrainIncomeByUser","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserTotalSelfIncomeEarned","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserXTokenClaimHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"}],"internalType":"struct bulldefi.IncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserXTokenGlobalDownlineIncomeHistory","outputs":[{"components":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"fromAddress","type":"address"},{"internalType":"uint256","name":"packageId","type":"uint256"},{"internalType":"bytes32","name":"incomeType","type":"bytes32"}],"internalType":"struct bulldefi.IncomeRecord[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getUsersWithInitialRewardCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"isUserRegistered","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"nextUserId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"packageIdToValue","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_referrerAddress","type":"address"}],"name":"register","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"selfIncomeAmounts","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_newPrice","type":"uint256"}],"name":"setBdfTokenPrice","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"totalMissedDirectContainer","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalUsers","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"userIdToAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"userInfo","outputs":[{"internalType":"uint256","name":"userId","type":"uint256"},{"internalType":"address","name":"referrer","type":"address"},{"internalType":"uint256","name":"totalDirectIncome","type":"uint256"},{"internalType":"uint256","name":"totalContainerIncome","type":"uint256"},{"internalType":"uint256","name":"totalDrainIncomeClaimable","type":"uint256"},{"internalType":"uint256","name":"totalSelfIncome","type":"uint256"},{"internalType":"uint256","name":"totalMissedDirect","type":"uint256"},{"internalType":"uint256","name":"totalMissedContainer","type":"uint256"},{"internalType":"uint256","name":"totalMissedDrain","type":"uint256"},{"internalType":"uint256","name":"totalXTokensGlobalDownlineClaimable","type":"uint256"},{"internalType":"uint256","name":"lastClaimedTimestamp","type":"uint256"},{"internalType":"uint256","name":"lastMissedClaimedTimestamp","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"userPackages","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"withdrawDrainIncome","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}];
+    <div class="section">
+        <h2>Logs</h2>
+        <pre id="log"></pre>
+    </div>
 
-    let provider;
-    let signer;
-    let contract;
-    let userAddress;
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+    // --- कॉन्ट्रैक्ट पते यहाँ डालें ---
+    const REFERRAL_CONTRACT_ADDRESS = "0xadf4a8f450BB42367Ba4f2F0Ac1BA90bD45600Cf";
+    const TOKEN_CONTRACT_ADDRESS = "0x7b5ba20d38600eD21587d40C7910106833ee3E69";
 
-    document.getElementById('connectButton').addEventListener('click', async () => {
-        // Desktop (MetaMask) ke liye check karein
-        if (typeof window.ethereum !== 'undefined') {
-            try {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                signer = provider.getSigner();
-                userAddress = await signer.getAddress();
-                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    // --- पैकेजों की कीमत (यह आपके Solidity कोड से मेल खानी चाहिए) ---
+    const PACKAGE_PRICES = [
+        ethers.BigNumber.from("10000000000000000"),  // 0: Beginner (0.01)
+        ethers.BigNumber.from("20000000000000000"),  // 1: Bronze (0.02)
+        ethers.BigNumber.from("40000000000000000"),  // 2: Advisor (0.04)
+        ethers.BigNumber.from("80000000000000000"),  // 3: Silver (0.08)
+        ethers.BigNumber.from("160000000000000000"), // 4: Achiever (0.16)
+        ethers.BigNumber.from("320000000000000000"), // 5: Legend (0.32)
+        ethers.BigNumber.from("640000000000000000"), // 6: Spark (0.64)
+        ethers.BigNumber.from("1280000000000000000"),// 7: Champion (1.28)
+        ethers.BigNumber.from("2560000000000000000"),// 8: Gold (2.56)
+        ethers.BigNumber.from("5120000000000000000"),// 9: Diamond (5.12)
+        ethers.BigNumber.from("10240000000000000000"),// 10: Platinum (10.24)
+        ethers.BigNumber.from("20480000000000000000"),// 11: Director (20.48)
+        ethers.BigNumber.from("40960000000000000000"),// 12: Emperor (40.96)
+        ethers.BigNumber.from("81920000000000000000"),// 13: Tycoon (81.92)
+        ethers.BigNumber.from("163840000000000000000")// 14: Creator (163.84)
+    ];
 
-                document.getElementById('connectButton').innerText = `Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
-                document.getElementById('fetchMyDataButton').style.display = 'inline-block';
-                document.getElementById('dataDisplay').innerHTML = `<p>Wallet connected. Click "Fetch My Data" to see your details.</p>`;
-            } catch (error) {
-                console.error("User denied account access or another error occurred:", error);
-                alert("Could not connect to wallet. Please ensure MetaMask is installed and unlocked.");
-            }
-        } 
-        // Mobile (WalletConnect) ke liye check karein
-        else {
-            try {
-                // WalletConnect provider ko setup karein
-                const walletConnectProvider = new WalletConnectProvider.default({
-                    infuraId: "YOUR_INFURA_PROJECT_ID",
-                });
+    // --- ABIs (यह पहले से ही यहाँ दिया गया है) ---
+    const ERC20_ABI = [
+        "function approve(address spender, uint256 amount) returns (bool)",
+        "function allowance(address owner, address spender) view returns (uint256)",
+    ];
 
-                await walletConnectProvider.enable();
+    const REFERRAL_ABI = [
+        "function join(address _referrer, uint256 _packageId) external",
+        "function packages(uint256) view returns (string, uint256)",
+    ];
 
-                provider = new ethers.providers.Web3Provider(walletConnectProvider);
-                signer = provider.getSigner();
-                userAddress = await signer.getAddress();
-                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    let provider, signer, userAddress;
+    let referralContract, tokenContract;
 
-                document.getElementById('connectButton').innerText = `Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
-                document.getElementById('fetchMyDataButton').style.display = 'inline-block';
-                document.getElementById('dataDisplay').innerHTML = `<p>Wallet connected. Click "Fetch My Data" to see your details.</p>`;
-            } catch (error) {
-                console.error("WalletConnect connection error:", error);
-                alert("Could not connect via WalletConnect. Please make sure you have a mobile wallet installed.");
-            }
-        }
-    });
+    const logEl = document.getElementById("log");
+    const userAddressEl = document.getElementById("userAddress");
 
-    document.getElementById('fetchMyDataButton').addEventListener('click', () => {
-        if (!contract) {
-            alert("Please connect your wallet first.");
-            return;
-        }
-        fetchAndDisplayData(userAddress);
-    });
-
-    document.getElementById('fetchOtherDataButton').addEventListener('click', async () => {
-        if (!contract) {
-            alert("Please connect your wallet first.");
-            return;
-        }
-
-        const addressInput = document.getElementById('addressInput').value;
-        const idInput = document.getElementById('idInput').value;
-        let targetAddress = null;
-
-        try {
-            if (addressInput && ethers.utils.isAddress(addressInput)) {
-                targetAddress = addressInput;
-            } 
-            else if (idInput) {
-                targetAddress = await contract.getAddressFromUserId(parseInt(idInput));
-                if (targetAddress === "0x0000000000000000000000000000000000000000") {
-                    document.getElementById('dataDisplay').innerHTML = `<p style="color:red;">Invalid User ID or user not found.</p>`;
-                    document.getElementById('addressInput').value = '';
-                    document.getElementById('idInput').value = '';
-                    return;
-                }
-            } else {
-                alert("Please enter a valid wallet address or a user ID.");
-                document.getElementById('addressInput').value = '';
-                document.getElementById('idInput').value = '';
-                return;
-            }
-            fetchAndDisplayData(targetAddress);
-        } catch (error) {
-            console.error("Error fetching address from User ID:", error);
-            document.getElementById('dataDisplay').innerHTML = `<p style="color:red;">Error: User ID not found or an error occurred.</p>`;
-            document.getElementById('addressInput').value = '';
-            document.getElementById('idInput').value = '';
-            return;
-        }
-        document.getElementById('addressInput').value = '';
-        document.getElementById('idInput').value = '';
-    });
-
-    async function fetchAndDisplayData(targetAddress) {
-        try {
-            document.getElementById('dataDisplay').innerHTML = `<h2>Fetching Data for ${targetAddress}...</h2>`;
-            
-            const [
-                isRegistered,
-                userIncomeDetails,
-                userId,
-                directReferrals,
-                totalEarned,
-                totalMissed,
-                todayEarned,
-                todayMissed,
-                availableDrain,
-                availableXTokens,
-                purchasedPackages,
-                directHistory,
-                missedDirectHistory,
-                containerHistory,
-                missedContainerHistory,
-                drainHistory,
-                missedDrainHistory
-            ] = await Promise.all([
-                contract.isUserRegistered(targetAddress),
-                contract.getUserIncomeDetails(targetAddress),
-                contract.getUserId(targetAddress),
-                contract.getUserDirectReferrals(targetAddress),
-                contract.getTotalEarnedIncome(targetAddress),
-                contract.getTotalMissedIncome(targetAddress),
-                contract.getTodayEarnedIncome(targetAddress),
-                contract.getTodayMissedIncome(targetAddress),
-                contract.getClaimableDrainBalance(targetAddress),
-                contract.getClaimableXTokensGlobalDownline(targetAddress),
-                contract.getUserPurchasedPackages(targetAddress),
-                contract.getUserDirectIncomeHistory(targetAddress),
-                contract.getUserMissedDirectHistory(targetAddress),
-                contract.getUserContainerIncomeHistory(targetAddress),
-                contract.getUserMissedContainerHistory(targetAddress),
-                contract.getUserDrainIncomeHistory(targetAddress),
-                contract.getUserMissedDrainHistory(targetAddress)
-            ]);
-
-            if (!isRegistered) {
-                document.getElementById('dataDisplay').innerHTML = `<p style="color:red;">User is not registered on the contract.</p>`;
-                return;
-            }
-
-            const displayDiv = document.getElementById('dataDisplay');
-            displayDiv.innerHTML = ''; 
-            
-            const formatHistory = (history, incomeType) => {
-                if (history.length === 0) return `<p>No ${incomeType} history found.</p>`;
-                let html = `<table><thead><tr><th>Amount</th><th>Timestamp</th><th>From Address</th><th>Package ID</th></tr></thead><tbody>`;
-                history.forEach(record => {
-                    html += `<tr>
-                        <td>${ethers.utils.formatUnits(record.amount, 18)} BUSD</td>  <td>${new Date(record.timestamp * 1000).toLocaleString()}</td>
-                        <td>${record.fromAddress}</td>
-                        <td>${record.packageId.toString()}</td>
-                    </tr>`;
-                });
-                html += `</tbody></table>`;
-                return html;
-            };
-
-            const formatMissedHistory = (history, incomeType) => {
-                if (history.length === 0) return `<p>No ${incomeType} history found.</p>`;
-                let html = `<table><thead><tr><th>Amount</th><th>Timestamp</th><th>From Address</th><th>Package ID</th><th>Actual Recipient</th></tr></thead><tbody>`;
-                history.forEach(record => {
-                    html += `<tr>
-                        <td>${ethers.utils.formatUnits(record.amount, 18)} BUSD</td>  <td>${new Date(record.timestamp * 1000).toLocaleString()}</td>
-                        <td>${record.fromAddress}</td>
-                        <td>${record.packageId.toString()}</td>
-                        <td>${record.actualRecipient}</td>
-                    </tr>`;
-                });
-                html += `</tbody></table>`;
-                return html;
-            };
-
-            displayDiv.innerHTML += `
-                <div class="data-section">
-                    <h3>Summary for User: ${targetAddress}</h3>
-                    <p><strong>User ID:</strong> ${userId.toString()}</p>
-                    <p><strong>Total Income:</strong> ${ethers.utils.formatUnits(totalEarned.grandTotal, 18)} BUSD</p>  <p><strong>Total Missed Income:</strong> ${ethers.utils.formatUnits(totalMissed, 18)} BUSD</p>  <p><strong>Today's Income:</strong> ${ethers.utils.formatUnits(todayEarned.grandTotalToday, 18)} BUSD</p>  <p><strong>Today's Missed Income:</strong> ${ethers.utils.formatUnits(todayMissed.grandTotalMissedToday, 18)} BUSD</p>  </div>
-            `;
-
-            displayDiv.innerHTML += `
-                <div class="data-section">
-                    <h3>Available Balances</h3>
-                    <p><strong>Claimable Drain Withdrawal Balance:</strong> ${ethers.utils.formatUnits(availableDrain, 18)} BUSD</p>  <p><strong>Claimable XToken (Global Downline) Balance:</strong> ${ethers.utils.formatUnits(availableXTokens, 18)} BDF</p>
-                </div>
-            `;
-
-            displayDiv.innerHTML += `
-                <div class="data-section">
-                    <h3>Detailed Income Totals</h3>
-                    <p><strong>Total Direct Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalDirectIncome, 18)} BUSD</p>  <p><strong>Total Container Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalContainerIncome, 18)} BUSD</p>  <p><strong>Total Drain Income:</strong> (History se dekhein)</p>
-                    <p><strong>Total Self Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalSelfIncome, 18)} BUSD</p>  <p><strong>Total Missed Direct Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedDirect, 18)} BUSD</p>  <p><strong>Total Missed Container Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedContainer, 18)} BUSD</p>  <p><strong>Total Missed Drain Income:</strong> ${ethers.utils.formatUnits(userIncomeDetails.totalMissedDrain, 18)} BUSD</p>  </div>
-            `;
-            
-            const directRefsHtml = directReferrals.length > 0 ? `<ul>${directReferrals.map(ref => `<li>${ref}</li>`).join('')}</ul>` : `<p>No direct referrals found.</p>`;
-            displayDiv.innerHTML += `
-                <div class="data-section">
-                    <h3>Team Details</h3>
-                    <p><strong>Direct Referrals (${directReferrals.length}):</strong></p>
-                    ${directRefsHtml}
-                </div>
-            `;
-
-            if (purchasedPackages.length > 0) {
-                let packagesHtml = '';
-                for (const pkgId of purchasedPackages) {
-                    const round = await contract.getUserContainerRound(targetAddress, pkgId);
-                    const slots = await contract.getUserContainerSpots(targetAddress, pkgId);
-                    const filledSlots = slots.filter(slot => slot == 1).length;
-                    
-                    packagesHtml += `
-                        <h4>Package ID: ${pkgId.toString()}</h4>
-                        <p><strong>Current Container Round:</strong> ${round.toString()}</p>
-                        <p><strong>Container Slots:</strong> ${filledSlots} / 10 filled</p>
-                        <p>Slots Data: [${slots.toString()}]</p>
-                    `;
-                }
-                displayDiv.innerHTML += `
-                    <div class="data-section">
-                        <h3>Packages</h3>
-                        ${packagesHtml}
-                    </div>
-                `;
-            } else {
-                displayDiv.innerHTML += `<div class="data-section"><h3>Packages</h3><p>No packages purchased yet.</p></div>`;
-            }
-
-            displayDiv.innerHTML += `
-                <div class="data-section">
-                    <h3>Income History</h3>
-                    <h4>Direct Income History</h4>
-                    ${formatHistory(directHistory, "Direct Income")}
-                    <h4>Container Income History</h4>
-                    ${formatHistory(containerHistory, "Container Income")}
-                    <h4>Drain Income History</h4>
-                    ${formatHistory(drainHistory, "Drain Income")}
-                </div>
-            `;
-
-            displayDiv.innerHTML += `
-                <div class="data-section">
-                    <h3>Missed Income History</h3>
-                    <h4>Missed Direct Income History</h4>
-                    ${formatMissedHistory(missedDirectHistory, "Missed Direct Income")}
-                    <h4>Missed Container Income History</h4>
-                    ${formatMissedHistory(missedContainerHistory, "Missed Container Income")}
-                    <h4>Missed Drain Income History</h4>
-                    ${formatMissedHistory(missedDrainHistory, "Missed Drain Income")}
-                </div>
-            `;
-            
-        } catch (error) {
-            console.error("Error fetching data:", error);
-            document.getElementById('dataDisplay').innerHTML = `<p style="color:red;">Data fetch karne mein error. Kripya thodi der baad dobara koshish karein ya network connection check karein. Error details console mein dekhen.</p>`;
-        }
+    function log(msg) {
+        logEl.textContent += msg + "\n";
+        logEl.scrollTop = logEl.scrollHeight;
+        console.log(msg);
     }
+    
+    // --- 1. वॉलेट कनेक्ट करें ---
+    document.getElementById("connectBtn").onclick = async () => {
+        if (!window.ethereum) {
+            alert("MetaMask नहीं मिला! कृपया इसे इंस्टॉल करें।");
+            return;
+        }
+        try {
+            await window.ethereum.request({ method: "eth_requestAccounts" });
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+            userAddress = await signer.getAddress();
+            
+            // कॉन्ट्रैक्ट्स कोsigner से जोड़ें
+            referralContract = new ethers.Contract(REFERRAL_CONTRACT_ADDRESS, REFERRAL_ABI, signer);
+            tokenContract = new ethers.Contract(TOKEN_CONTRACT_ADDRESS, ERC20_ABI, signer);
+
+            userAddressEl.textContent = userAddress;
+            log(`✅ वॉलेट कनेक्ट हो गया: ${userAddress}`);
+        } catch (error) {
+            alert("वॉलेट कनेक्ट करने में एरर आया।");
+            log(`❌ एरर: ${error.message}`);
+        }
+    };
+
+    // --- 2. टोकन अप्रूव करें ---
+    document.getElementById("approveBtn").onclick = async () => {
+        if (!signer) {
+            alert("पहले वॉलेट कनेक्ट करें।");
+            return;
+        }
+
+        const packageId = document.getElementById("packageIdInput").value;
+        if (packageId === "" || packageId < 0 || packageId >= PACKAGE_PRICES.length) {
+            alert("कृपया एक वैध पैकेज ID डालें (0-14)।");
+            return;
+        }
+
+        const requiredAmount = PACKAGE_PRICES[packageId];
+        log(`पैकेज ${packageId} के लिए टोकन अप्रूव कर रहे हैं। आवश्यक राशि: ${requiredAmount.toString()}`);
+
+        try {
+            const tx = await tokenContract.approve(REFERRAL_CONTRACT_ADDRESS, requiredAmount);
+            log(`अप्रूव ट्रांजेक्शन भेजी गई: ${tx.hash}`);
+            await tx.wait();
+            log("✅ अप्रूव ट्रांजेक्शन सफल हो गई!");
+        } catch (error) {
+            log("❌ टोकन अप्रूव करने में एरर आया।");
+            log(`❌ एरर: ${error.message}`);
+        }
+    };
+
+    // --- 3. पैकेज खरीदें (Join) ---
+    document.getElementById("joinBtn").onclick = async () => {
+        if (!signer) {
+            alert("पहले वॉलेट कनेक्ट करें।");
+            return;
+        }
+        const referrerAddress = document.getElementById("referrerAddressInput").value || "0x0000000000000000000000000000000000000000";
+        const packageId = document.getElementById("buyPackageIdInput").value;
+
+        if (packageId === "" || packageId < 0 || packageId >= PACKAGE_PRICES.length) {
+            alert("कृपया एक वैध पैकेज ID डालें (0-14)।");
+            return;
+        }
+
+        log(`पैकेज ${packageId} खरीद रहे हैं...`);
+
+        try {
+            const tx = await referralContract.join(referrerAddress, packageId);
+            log(`ज्वाइन ट्रांजेक्शन भेजी गई: ${tx.hash}`);
+            await tx.wait();
+            log("✅ पैकेज सफलतापूर्वक खरीद लिया गया!");
+        } catch (error) {
+            log("❌ पैकेज खरीदने में एरर आया।");
+            log(`❌ एरर: ${error.message}`);
+        }
+    };
 </script>
 
 </body>
