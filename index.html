@@ -1,212 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Referral System DApp</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 30px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 6px; }
-        h2 { border-bottom: 2px solid #333; padding-bottom: 5px; }
-        button { padding: 10px 20px; font-size: 16px; margin-top: 10px; cursor: pointer; background-color: #007BFF; color: white; border: none; border-radius: 4px; }
-        button:hover { background-color: #0056b3; }
-        input[type="text"], input[type="number"] { width: 95%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
-        #log { background: #f0f0f0; padding: 10px; min-height: 100px; overflow-y: auto; border-radius: 5px; margin-top: 15px; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Referral System DApp</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 30px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 6px; }
+        h2 { border-bottom: 2px solid #333; padding-bottom: 5px; }
+        button { padding: 10px 20px; font-size: 16px; margin-top: 10px; cursor: pointer; background-color: #007BFF; color: white; border: none; border-radius: 4px; }
+        button:hover { background-color: #0056b3; }
+        input[type="text"], input[type="number"] { width: 95%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        #log { background: #f0f0f0; padding: 10px; min-height: 100px; overflow-y: auto; border-radius: 5px; margin-top: 15px; }
+    </style>
 </head>
 <body>
 
-    <h1>My Referral System - BSC Testnet</h1>
-    <div class="section">
-        <h2>1. Wallet Connect</h2>
-        <button id="connectBtn">Connect MetaMask</button>
-        <p>Connected Address: <span id="userAddress">N/A</span></p>
-    </div>
+    <h1>My Referral System - BSC Testnet</h1>
+    <div class="section">
+        <h2>1. Wallet Connect</h2>
+        <button id="connectBtn">Connect MetaMask</button>
+        <p>Connected Address: <span id="userAddress">N/A</span></p>
+    </div>
 
-    <div class="section">
-        <h2>2. Approve Tokens</h2>
-        <p>Before buying a package, you need to approve the contract to spend your tokens.</p>
-        <input type="number" id="packageIdInput" placeholder="Enter Package ID (e.g., 0)">
-        <button id="approveBtn">Approve Tokens for Package</button>
-    </div>
+    <div class="section">
+        <h2>2. Approve Tokens</h2>
+        <p>Before buying a package, you need to approve the contract to spend your tokens.</p>
+        <input type="number" id="packageIdInput" placeholder="Enter Package ID (e.g., 0)">
+        <button id="approveBtn">Approve Tokens for Package</button>
+    </div>
 
-    <div class="section">
-        <h2>3. Register / Buy First Package</h2>
-        <p>Register as a new user by buying the first package (ID 0).</p>
-        <input type="text" id="referrerAddressInput" placeholder="Referrer Address (or 0x0 for none)">
-        <button id="registerBtn">Register</button>
-    </div>
+    <div class="section">
+        <h2>3. Register / Buy First Package</h2>
+        <p>Register as a new user by buying the first package (ID 0).</p>
+        <input type="text" id="referrerAddressInput" placeholder="Referrer Address (or 0x0 for none)">
+        <button id="registerBtn">Register</button>
+    </div>
 
-    <div class="section">
-        <h2>4. Upgrade Package</h2>
-        <p>Upgrade to the next available package.</p>
-        <button id="upgradeBtn">Buy Next Package</button>
-    </div>
+    <div class="section">
+        <h2>4. Upgrade Package</h2>
+        <p>Upgrade to the next available package.</p>
+        <button id="upgradeBtn">Buy Next Package</button>
+    </div>
 
-    <div class="section">
-        <h2>Logs</h2>
-        <pre id="log"></pre>
-    </div>
+    <div class="section">
+        <h2>Logs</h2>
+        <pre id="log"></pre>
+    </div>
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script>
-    const REFERRAL_CONTRACT_ADDRESS = "0x118F26c6c86Ded14fCEEC0Fa6720F9EF61D7479a";
-    const TOKEN_CONTRACT_ADDRESS    = "0x7b5ba20d38600eD21587d40C7910106833ee3E69";
+    const REFERRAL_CONTRACT_ADDRESS = "0x8edf6abDebaC7b990B88894bD1b217b4059E2723";
+    const TOKEN_CONTRACT_ADDRESS    = "0x7b5ba20d38600eD21587d40C7910106833ee3E69";
 
-    const PACKAGE_PRICES = [
-        ethers.BigNumber.from("10000000000000000"),
-        ethers.BigNumber.from("20000000000000000"),
-        ethers.BigNumber.from("40000000000000000"),
-        ethers.BigNumber.from("80000000000000000"),
-        ethers.BigNumber.from("160000000000000000"),
-        ethers.BigNumber.from("320000000000000000"),
-        ethers.BigNumber.from("640000000000000000"),
-        ethers.BigNumber.from("1280000000000000000"),
-        ethers.BigNumber.from("2560000000000000000"),
-        ethers.BigNumber.from("5120000000000000000"),
-        ethers.BigNumber.from("10240000000000000000"),
-        ethers.BigNumber.from("20480000000000000000"),
-        ethers.BigNumber.from("40960000000000000000"),
-        ethers.BigNumber.from("81920000000000000000"),
-        ethers.BigNumber.from("163840000000000000000")
-    ];
-
-    const ERC20_ABI = [
-        "function approve(address spender, uint256 amount) returns (bool)",
-        "function allowance(address owner, address spender) view returns (uint256)"
-    ];
-
-    const REFERRAL_ABI = [
-        "function registerUser(address _referrer) external",
-        "function buyNextPackage() external"
-    ];
-
-    let provider, signer, userAddress;
-    let referralContract, tokenContract;
-
-    const logEl = document.getElementById("log");
-    const userAddressEl = document.getElementById("userAddress");
-
-    function log(msg) {
-        logEl.textContent += msg + "\n";
-        logEl.scrollTop = logEl.scrollHeight;
-        console.log(msg);
+    // Dynamically generate package prices from 1 to 15 BNB (in wei)
+    const PACKAGE_PRICES = [];
+    for (let i = 0; i < 15; i++) {
+        PACKAGE_PRICES.push(ethers.BigNumber.from((i + 1).toString()).mul(ethers.BigNumber.from("10").pow(18)));
     }
+    
+    const ERC20_ABI = [
+        "function approve(address spender, uint256 amount) returns (bool)",
+        "function allowance(address owner, address spender) view returns (uint256)"
+    ];
 
-    // --- 1. MetaMask Wallet Connect Only ---
-    document.getElementById("connectBtn").onclick = async () => {
-        if (typeof window.ethereum === "undefined") {
-            alert("MetaMask नहीं मिला! कृपया इसे install करें।");
-            return;
-        }
+    const REFERRAL_ABI = [
+        "function registerUser(address _referrer) external",
+        "function buyNextPackage() external"
+    ];
 
-        if (!window.ethereum.isMetaMask) {
-            alert("कृपया केवल MetaMask का उपयोग करें। अन्य wallets supported नहीं हैं।");
-            return;
-        }
+    let provider, signer, userAddress;
+    let referralContract, tokenContract;
 
-        try {
-            await window.ethereum.request({
-                method: "wallet_switchEthereumChain",
-                params: [{ chainId: "0x61" }] // BSC Testnet = 97
-            });
-        } catch (switchError) {
-            if (switchError.code === 4902) {
-                try {
-                    await window.ethereum.request({
-                        method: "wallet_addEthereumChain",
-                        params: [{
-                            chainId: "0x61",
-                            chainName: "BNB Smart Chain Testnet",
-                            rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-                            nativeCurrency: { name: "tBNB", symbol: "tBNB", decimals: 18 },
-                            blockExplorerUrls: ["https://testnet.bscscan.com"]
-                        }]
-                    });
-                } catch (addError) {
-                    log(`❌ Network add error: ${addError.message}`);
-                    return;
-                }
-            } else {
-                log(`❌ Network switch error: ${switchError.message}`);
-                return;
-            }
-        }
+    const logEl = document.getElementById("log");
+    const userAddressEl = document.getElementById("userAddress");
 
-        try {
-            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-            userAddress = accounts[0];
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
+    function log(msg) {
+        logEl.textContent += msg + "\n";
+        logEl.scrollTop = logEl.scrollHeight;
+        console.log(msg);
+    }
 
-            referralContract = new ethers.Contract(REFERRAL_CONTRACT_ADDRESS, REFERRAL_ABI, signer);
-            tokenContract = new ethers.Contract(TOKEN_CONTRACT_ADDRESS, ERC20_ABI, signer);
+    // --- 1. MetaMask Wallet Connect Only ---
+    document.getElementById("connectBtn").onclick = async () => {
+        if (typeof window.ethereum === "undefined") {
+            alert("MetaMask नहीं मिला! कृपया इसे install करें।");
+            return;
+        }
 
-            userAddressEl.textContent = userAddress;
-            log(`✅ MetaMask wallet connected: ${userAddress}`);
-        } catch (err) {
-            log(`❌ Error: ${err.message}`);
-        }
-    };
+        if (!window.ethereum.isMetaMask) {
+            alert("कृपया केवल MetaMask का उपयोग करें। अन्य wallets supported नहीं हैं।");
+            return;
+        }
 
-    // --- 2. Approve Tokens ---
-    document.getElementById("approveBtn").onclick = async () => {
-        if (!signer) { alert("पहले MetaMask connect करें।"); return; }
+        try {
+            await window.ethereum.request({
+                method: "wallet_switchEthereumChain",
+                params: [{ chainId: "0x61" }] // BSC Testnet = 97
+            });
+        } catch (switchError) {
+            if (switchError.code === 4902) {
+                try {
+                    await window.ethereum.request({
+                        method: "wallet_addEthereumChain",
+                        params: [{
+                            chainId: "0x61",
+                            chainName: "BNB Smart Chain Testnet",
+                            rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+                            nativeCurrency: { name: "tBNB", symbol: "tBNB", decimals: 18 },
+                            blockExplorerUrls: ["https://testnet.bscscan.com"]
+                        }]
+                    });
+                } catch (addError) {
+                    log(`❌ Network add error: ${addError.message}`);
+                    return;
+                }
+            } else {
+                log(`❌ Network switch error: ${switchError.message}`);
+                return;
+            }
+        }
 
-        const packageId = document.getElementById("packageIdInput").value;
-        if (packageId === "" || packageId < 0 || packageId >= PACKAGE_PRICES.length) {
-            alert("कृपया एक वैध पैकेज ID डालें (0-14)।");
-            return;
-        }
+        try {
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            userAddress = accounts[0];
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
 
-        const requiredAmount = PACKAGE_PRICES[packageId];
-        log(`पैकेज ${packageId} के लिए टोकन approve कर रहे हैं।`);
+            referralContract = new ethers.Contract(REFERRAL_CONTRACT_ADDRESS, REFERRAL_ABI, signer);
+            tokenContract = new ethers.Contract(TOKEN_CONTRACT_ADDRESS, ERC20_ABI, signer);
 
-        try {
-            const tx = await tokenContract.approve(REFERRAL_CONTRACT_ADDRESS, requiredAmount);
-            log(`Approve TX भेजी गई: ${tx.hash}`);
-            await tx.wait();
-            log("✅ Approve सफल।");
-        } catch (error) {
-            log(`❌ Approve error: ${error.message}`);
-        }
-    };
+            userAddressEl.textContent = userAddress;
+            log(`✅ MetaMask wallet connected: ${userAddress}`);
+        } catch (err) {
+            log(`❌ Error: ${err.message}`);
+        }
+    };
 
-    // --- 3. Register / Buy First Package ---
-    document.getElementById("registerBtn").onclick = async () => {
-        if (!signer) { alert("पहले MetaMask connect करें।"); return; }
-        
-        const referrerAddress = document.getElementById("referrerAddressInput").value || "0x0000000000000000000000000000000000000000";
+    // --- 2. Approve Tokens ---
+    document.getElementById("approveBtn").onclick = async () => {
+        if (!signer) { alert("पहले MetaMask connect करें।"); return; }
 
-        log(`रेफरर ${referrerAddress} के साथ रजिस्टर कर रहे हैं...`);
+        const packageId = document.getElementById("packageIdInput").value;
+        if (packageId === "" || packageId < 0 || packageId >= PACKAGE_PRICES.length) {
+            alert("कृपया एक वैध पैकेज ID डालें (0-14)।");
+            return;
+        }
 
-        try {
-            const tx = await referralContract.registerUser(referrerAddress);
-            log(`Registration TX भेजी गई: ${tx.hash}`);
-            await tx.wait();
-            log("✅ रजिस्ट्रेशन और पहला पैकेज सफलतापूर्वक खरीदा गया।");
-        } catch (error) {
-            log(`❌ Registration error: ${error.message}`);
-        }
-    };
+        const requiredAmount = PACKAGE_PRICES[packageId];
+        log(`पैकेज ${packageId} के लिए टोकन approve कर रहे हैं।`);
 
-    // --- 4. Upgrade Package ---
-    document.getElementById("upgradeBtn").onclick = async () => {
-        if (!signer) { alert("पहले MetaMask connect करें।"); return; }
+        try {
+            const tx = await tokenContract.approve(REFERRAL_CONTRACT_ADDRESS, requiredAmount);
+            log(`Approve TX भेजी गई: ${tx.hash}`);
+            await tx.wait();
+            log("✅ Approve सफल।");
+        } catch (error) {
+            log(`❌ Approve error: ${error.message}`);
+        }
+    };
 
-        log(`अगले पैकेज में अपग्रेड कर रहे हैं...`);
+    // --- 3. Register / Buy First Package ---
+    document.getElementById("registerBtn").onclick = async () => {
+        if (!signer) { alert("पहले MetaMask connect करें।"); return; }
+        
+        const referrerAddress = document.getElementById("referrerAddressInput").value || "0x0000000000000000000000000000000000000000";
 
-        try {
-            const tx = await referralContract.buyNextPackage();
-            log(`Upgrade TX भेजी गई: ${tx.hash}`);
-            await tx.wait();
-            log("✅ पैकेज सफलतापूर्वक अपग्रेड हुआ।");
-        } catch (error) {
-            log(`❌ Upgrade error: ${error.message}`);
-        }
-    };
+        log(`रेफरर ${referrerAddress} के साथ रजिस्टर कर रहे हैं...`);
+
+        try {
+            const tx = await referralContract.registerUser(referrerAddress);
+            log(`Registration TX भेजी गई: ${tx.hash}`);
+            await tx.wait();
+            log("✅ रजिस्ट्रेशन और पहला पैकेज सफलतापूर्वक खरीदा गया।");
+        } catch (error) {
+            log(`❌ Registration error: ${error.message}`);
+        }
+    };
+
+    // --- 4. Upgrade Package ---
+    document.getElementById("upgradeBtn").onclick = async () => {
+        if (!signer) { alert("पहले MetaMask connect करें।"); return; }
+
+        log(`अगले पैकेज में अपग्रेड कर रहे हैं...`);
+
+        try {
+            const tx = await referralContract.buyNextPackage();
+            log(`Upgrade TX भेजी गई: ${tx.hash}`);
+            await tx.wait();
+            log("✅ पैकेज सफलतापूर्वक अपग्रेड हुआ।");
+        } catch (error) {
+            log(`❌ Upgrade error: ${error.message}`);
+        }
+    };
 </script>
 
 </body>
 </html>
-
