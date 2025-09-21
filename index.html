@@ -16,7 +16,7 @@
 </head>
 <body>
 
-    <h1>My Referral System - Testnet</h1>
+    <h1>My Referral System - BSC Testnet</h1>
     <div class="section">
         <h2>1. Wallet Connect</h2>
         <button id="connectBtn">Connect Wallet</button>
@@ -45,22 +45,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script>
-    // --- कॉन्ट्रैक्ट पते यहाँ डालें ---
-    const REFERRAL_CONTRACT_ADDRESS = "0xadf4a8f450BB42367Ba4f2F0Ac1BA90bD45600Cf";
-    const TOKEN_CONTRACT_ADDRESS = "0x7b5ba20d38600eD21587d40C7910106833ee3E69";
+    // --- कॉन्ट्रैक्ट पते ---
+    const REFERRAL_CONTRACT_ADDRESS = "0x36e2a2B4282e69A2129E504b732ACEdf9A16e195";
+    const TOKEN_CONTRACT_ADDRESS    = "0x7b5ba20d38600eD21587d40C7910106833ee3E69";
 
-    // --- पैकेजों की कीमत (यह आपके Solidity कोड से मेल खानी चाहिए) ---
+    // --- पैकेजों की कीमतें ---
     const PACKAGE_PRICES = [
-        ethers.BigNumber.from("10000000000000000"),  // 0: Beginner (0.01)
-        ethers.BigNumber.from("20000000000000000"),  // 1: Bronze (0.02)
-        ethers.BigNumber.from("40000000000000000"),  // 2: Advisor (0.04)
-        ethers.BigNumber.from("80000000000000000"),  // 3: Silver (0.08)
-        ethers.BigNumber.from("160000000000000000"), // 4: Achiever (0.16)
-        ethers.BigNumber.from("320000000000000000"), // 5: Legend (0.32)
-        ethers.BigNumber.from("640000000000000000"), // 6: Spark (0.64)
-        ethers.BigNumber.from("1280000000000000000"),// 7: Champion (1.28)
-        ethers.BigNumber.from("2560000000000000000"),// 8: Gold (2.56)
-        ethers.BigNumber.from("5120000000000000000"),// 9: Diamond (5.12)
+        ethers.BigNumber.from("10000000000000000"),   // 0: Beginner (0.01)
+        ethers.BigNumber.from("20000000000000000"),   // 1: Bronze (0.02)
+        ethers.BigNumber.from("40000000000000000"),   // 2: Advisor (0.04)
+        ethers.BigNumber.from("80000000000000000"),   // 3: Silver (0.08)
+        ethers.BigNumber.from("160000000000000000"),  // 4: Achiever (0.16)
+        ethers.BigNumber.from("320000000000000000"),  // 5: Legend (0.32)
+        ethers.BigNumber.from("640000000000000000"),  // 6: Spark (0.64)
+        ethers.BigNumber.from("1280000000000000000"), // 7: Champion (1.28)
+        ethers.BigNumber.from("2560000000000000000"), // 8: Gold (2.56)
+        ethers.BigNumber.from("5120000000000000000"), // 9: Diamond (5.12)
         ethers.BigNumber.from("10240000000000000000"),// 10: Platinum (10.24)
         ethers.BigNumber.from("20480000000000000000"),// 11: Director (20.48)
         ethers.BigNumber.from("40960000000000000000"),// 12: Emperor (40.96)
@@ -68,15 +68,15 @@
         ethers.BigNumber.from("163840000000000000000")// 14: Creator (163.84)
     ];
 
-    // --- ABIs (यह पहले से ही यहाँ दिया गया है) ---
+    // --- ABIs ---
     const ERC20_ABI = [
         "function approve(address spender, uint256 amount) returns (bool)",
-        "function allowance(address owner, address spender) view returns (uint256)",
+        "function allowance(address owner, address spender) view returns (uint256)"
     ];
 
     const REFERRAL_ABI = [
         "function join(address _referrer, uint256 _packageId) external",
-        "function packages(uint256) view returns (string, uint256)",
+        "function packages(uint256) view returns (string, uint256)"
     ];
 
     let provider, signer, userAddress;
@@ -90,28 +90,62 @@
         logEl.scrollTop = logEl.scrollHeight;
         console.log(msg);
     }
-    
+
     // --- 1. वॉलेट कनेक्ट करें ---
     document.getElementById("connectBtn").onclick = async () => {
-        if (!window.ethereum) {
-            alert("MetaMask नहीं मिला! कृपया इसे इंस्टॉल करें।");
+        if (typeof window.ethereum === "undefined") {
+            alert("MetaMask नहीं मिला! कृपया इसे install करें।");
             return;
         }
+
         try {
-            await window.ethereum.request({ method: "eth_requestAccounts" });
+            // पहले BSC Testnet पर switch करने की कोशिश
+            await window.ethereum.request({
+                method: "wallet_switchEthereumChain",
+                params: [{ chainId: "0x61" }], // BSC Testnet = 97
+            });
+        } catch (switchError) {
+            if (switchError.code === 4902) {
+                // अगर network MetaMask में नहीं है तो add करो
+                try {
+                    await window.ethereum.request({
+                        method: "wallet_addEthereumChain",
+                        params: [{
+                            chainId: "0x61",
+                            chainName: "BNB Smart Chain Testnet",
+                            rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+                            nativeCurrency: {
+                                name: "tBNB",
+                                symbol: "tBNB",
+                                decimals: 18
+                            },
+                            blockExplorerUrls: ["https://testnet.bscscan.com"]
+                        }]
+                    });
+                } catch (addError) {
+                    log(`❌ Error adding network: ${addError.message}`);
+                    return;
+                }
+            } else {
+                log(`❌ Network switch error: ${switchError.message}`);
+                return;
+            }
+        }
+
+        try {
+            // अब wallet connect करो
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            userAddress = accounts[0];
             provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
-            userAddress = await signer.getAddress();
-            
-            // कॉन्ट्रैक्ट्स कोsigner से जोड़ें
+
             referralContract = new ethers.Contract(REFERRAL_CONTRACT_ADDRESS, REFERRAL_ABI, signer);
             tokenContract = new ethers.Contract(TOKEN_CONTRACT_ADDRESS, ERC20_ABI, signer);
 
             userAddressEl.textContent = userAddress;
             log(`✅ वॉलेट कनेक्ट हो गया: ${userAddress}`);
-        } catch (error) {
-            alert("वॉलेट कनेक्ट करने में एरर आया।");
-            log(`❌ एरर: ${error.message}`);
+        } catch (err) {
+            log(`❌ Error: ${err.message}`);
         }
     };
 
