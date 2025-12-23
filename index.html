@@ -3,188 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TetherDefai | Professional Testing Panel</title>
+    <title>DigiexDefai | Admin & Test Panel</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
-        :root {
-            --primary: #00c853;
-            --secondary: #2979ff;
-            --danger: #ff5252;
-            --warning: #ffd600;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-            --border: #334155;
-        }
-
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: var(--bg); 
-            color: var(--text); 
-            margin: 0; 
-            padding: 20px; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .container { width: 100%; max-width: 900px; }
-
-        header {
-            text-align: center;
-            padding: 20px;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, var(--card), var(--bg));
-            border-radius: 15px;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .section { 
-            background: var(--card); 
-            padding: 25px; 
-            border-radius: 12px; 
-            margin-bottom: 25px; 
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 { color: var(--primary); margin-top: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
-        h2 span { font-size: 0.9rem; background: var(--border); padding: 2px 8px; border-radius: 5px; color: var(--text); }
-
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-
-        input { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 10px 0; 
-            border-radius: 8px; 
-            border: 1px solid var(--border); 
-            background: #0f172a; 
-            color: white;
-            box-sizing: border-box;
-        }
-
-        button { 
-            width: 100%;
-            padding: 12px; 
-            font-size: 16px; 
-            font-weight: bold;
-            cursor: pointer; 
-            background-color: var(--secondary); 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            transition: all 0.3s ease;
-            margin-top: 5px;
-        }
-
-        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
-        .btn-success { background-color: var(--primary); }
-        .btn-danger { background-color: var(--danger); }
-        .btn-warning { background-color: var(--warning); color: #000; }
-
-        .stats-box {
-            background: rgba(0, 200, 83, 0.1);
-            border: 1px solid var(--primary);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-
-        .stats-item { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
-        .stats-item:last-child { border: none; }
-
-        #log { 
-            background: #000; 
-            color: #00ff00; 
-            padding: 15px; 
-            height: 150px; 
-            overflow-y: auto; 
-            border-radius: 8px; 
-            font-family: 'Courier New', monospace; 
-            font-size: 13px;
-            border: 1px solid var(--border);
-        }
-
-        .loader { color: var(--warning); font-weight: bold; }
+        :root { --p: #00ffa3; --bg: #0b0e11; --card: #161a1e; --text: #eaecef; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #2b2f36; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #474d57; background: #1e2329; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: var(--p); color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
+        .console { background: #000; color: #00ff00; padding: 15px; height: 180px; overflow-y: auto; border-radius: 8px; font-family: monospace; font-size: 13px; border: 1px solid #333; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+        .stat-item { background: #1e2329; padding: 10px; border-radius: 6px; text-align: center; }
+        .stat-val { display: block; color: var(--p); font-size: 18px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h1>TetherDefai <span style="color: var(--primary);">V2</span> Testnet</h1>
-        <button id="connectBtn" class="btn-warning">Connect MetaMask Wallet</button>
-        <p style="margin-top: 10px;">Connected: <span id="userAddress" style="color: var(--primary);">Not Connected</span></p>
-    </header>
+    <div class="card" style="text-align: center;">
+        <h2 style="color: var(--p); margin-bottom: 5px;">DigiexDefai Professional Panel</h2>
+        <p id="walletDisplay">Please Connect Wallet</p>
+        <button onclick="connect()">Connect MetaMask</button>
+    </div>
 
-    <div class="grid">
-        <div class="section">
-            <h2><span>1</span> User Registration</h2>
-            <p style="font-size: 0.8rem; color: #94a3b8;">Naye user ko system mein shamil karein.</p>
-            <input type="text" id="regUser" placeholder="Choose Your Username">
-            <input type="text" id="regRef" placeholder="Referrer Username (e.g. tetherdefai)">
-            <button onclick="register()" class="btn-success">Register in Contract</button>
-        </div>
+    <div class="card">
+        <h3>1. New Registration</h3>
+        <input type="text" id="regUser" placeholder="Unique Username (e.g. digi786)">
+        <input type="text" id="regRef" placeholder="Referrer Username (e.g. tetherdefai)">
+        <button onclick="register()">Register Account</button>
+    </div>
 
-        <div class="section">
-            <h2><span>2</span> Fund & Invest</h2>
-            <p style="font-size: 0.8rem; color: #94a3b8;">USDT Approve karein aur fir deposit karein.</p>
-            <input type="number" id="depAmount" placeholder="Amount in USDT (e.g. 10)">
-            <button onclick="approveUSDT()">Step 1: Approve USDT</button>
-            <button onclick="deposit()" class="btn-success" style="margin-top: 10px;">Step 2: Deposit Funds</button>
+    <div class="card">
+        <h3>2. Investment (USDT)</h3>
+        <input type="number" id="depAmt" placeholder="Amount (Min 1 USDT)">
+        <div style="display: flex; gap: 10px;">
+            <button onclick="approve()" style="background: #2b2f36; color: white;">Step 1: Approve</button>
+            <button onclick="deposit()">Step 2: Deposit</button>
         </div>
     </div>
 
-    <div class="section">
-        <h2><span>3</span> Personal Dashboard</h2>
-        <button onclick="getUserStats()" class="btn-warning" style="width: auto; padding: 5px 20px;">Refresh Data</button>
-        
-        <div class="grid" style="margin-top: 15px;">
-            <div class="stats-box" id="mainStats">
-                <div class="stats-item"><span>Status:</span> <span id="isReg">No</span></div>
-                <div class="stats-item"><span>Total Invested:</span> <span id="totalDep">0 USDT</span></div>
-                <div class="stats-item"><span>Active Capital:</span> <span id="activeDep">0 USDT</span></div>
-                <div class="stats-item"><span>Total Withdrawn:</span> <span id="totalWith">0 USDT</span></div>
-            </div>
-            <div class="stats-box" style="border-color: var(--secondary); background: rgba(41, 121, 255, 0.1);">
-                <div class="stats-item"><span>Daily Rewards:</span> <span id="dailyAvail">0 USDT</span></div>
-                <div class="stats-item"><span>Network Rewards:</span> <span id="netAvail">0 USDT</span></div>
-                <div class="stats-item"><span>Your Rank:</span> <span id="userRank">Inviter</span></div>
-                <div class="stats-item"><span>Team Size:</span> <span id="teamCount">0</span></div>
-            </div>
+    <div class="card">
+        <h3>3. User Dashboard</h3>
+        <button onclick="fetchData()" style="background: #f0b90b; color: black; margin-bottom: 10px;">Refresh Live Data</button>
+        <div class="stats-grid">
+            <div class="stat-item">Username <span class="stat-val" id="st_name">--</span></div>
+            <div class="stat-item">Rank <span class="stat-val" id="st_rank">--</span></div>
+            <div class="stat-item">Active Deposit <span class="stat-val" id="st_active">0.00</span></div>
+            <div class="stat-item">Daily Profit <span class="stat-val" id="st_daily">0.00</span></div>
+            <div class="stat-item">Network Income <span class="stat-val" id="st_net">0.00</span></div>
+            <div class="stat-item">Team Size <span class="stat-val" id="st_team">0</span></div>
         </div>
     </div>
 
-    <div class="section">
-        <h2><span>4</span> Reward Operations</h2>
-        <div class="grid">
-            <div style="text-align: center;">
-                <h4>Daily ROI (ROI + Capital)</h4>
-                <button onclick="claimDaily()" class="btn-danger">Withdraw Daily</button>
-                <button onclick="compoundDaily()" class="btn-success">Compound Daily</button>
-            </div>
-            <div style="text-align: center;">
-                <h4>Network Income</h4>
-                <button onclick="claimNetwork()" class="btn-danger">Withdraw Network</button>
-                <button onclick="compoundNetwork()" class="btn-success">Compound Network</button>
-            </div>
+    <div class="card">
+        <h3>4. Operations</h3>
+        <div class="stats-grid">
+            <button onclick="claimDaily()" style="background: #ea3943; color: white;">Claim Daily</button>
+            <button onclick="compoundDaily()" style="background: #00c853; color: white;">Compound Daily</button>
+            <button onclick="claimNetwork()" style="background: #ea3943; color: white;">Claim Network</button>
+            <button onclick="compoundNetwork()" style="background: #00c853; color: white;">Compound Network</button>
         </div>
     </div>
 
-    <div class="section">
-        <h2>Terminal Console</h2>
-        <div id="log">Welcome to TetherDefai Console... Pehle Wallet Connect karein.</div>
-    </div>
+    <div class="console" id="log">Console Ready... Click Connect Wallet.</div>
 </div>
 
 <script>
-    // --- CONTRACT CONFIG ---
-    const CONTRACT_ADDRESS = "0x829EB6A1b04CD7F28298C52D1E5429A4E8708041"; 
-    const USDT_ADDRESS = "0x7b5ba20d38600eD21587d40C7910106833ee3E69"; // BSC Mainnet USDT
-    
-    // Sabhi important functions ka ABI
+    // --- SETTINGS ---
+    const CONTRACT_ADDR = "0x96c35f4114615A680e571717A7B5AA95DA482c27"; // Aapka deployed address
+    const USDT_ADDR = "0x7b5ba20d38600eD21587d40C7910106833ee3E69"; // Contract se liya gaya address
+
     const ABI = [
         "function register(string username, string referrerUsername) external",
         "function deposit(uint256 amount) external",
@@ -196,110 +86,88 @@
         "function usersExtra(address) view returns (uint256 rewardsReferral, uint256 rewardsOnboarding, uint256 rewardsRank, uint256 reserveDailyCapital, uint256 reserveDailyROI, uint256 reserveNetwork, uint32 teamCount, uint32 directsCount, uint32 directsQuali, uint8 rank)",
         "function getRankName(uint8 r) view returns (string)"
     ];
-
-    const USDT_ABI = [
-        "function approve(address spender, uint256 amount) returns (bool)",
-        "function allowance(address owner, address spender) view returns (uint256)"
-    ];
+    const USDT_ABI = ["function approve(address s, uint256 a) returns (bool)"];
 
     let signer, contract, usdt;
 
-    function log(msg) {
-        const logEl = document.getElementById("log");
-        logEl.innerHTML += `<br>> ${msg}`;
-        logEl.scrollTop = logEl.scrollHeight;
+    function log(m, err = false) {
+        const l = document.getElementById("log");
+        l.innerHTML += `<div style="color:${err ? '#ff5252' : '#00ff00'}">> ${m}</div>`;
+        l.scrollTop = l.scrollHeight;
     }
 
-    // Connect Wallet Logic
-    document.getElementById("connectBtn").onclick = async () => {
-        if (!window.ethereum) return alert("MetaMask Install karein!");
+    async function connect() {
+        if(!window.ethereum) return alert("Install MetaMask");
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
-        const addr = await signer.getAddress();
-        document.getElementById("userAddress").innerText = addr.substring(0,6)+"..."+addr.substring(38);
-        
-        contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-        usdt = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
-        log("Wallet Connected: " + addr);
-    };
-
-    // Registration
-    async function register() {
-        try {
-            const user = document.getElementById("regUser").value;
-            const ref = document.getElementById("regRef").value;
-            log(`Registering ${user} with ref ${ref}...`);
-            const tx = await contract.register(user, ref);
-            await tx.wait();
-            log("✅ Registration Successful!");
-        } catch (e) { log("❌ Error: " + (e.data?.message || e.message)); }
+        const a = await signer.getAddress();
+        document.getElementById("walletDisplay").innerText = "Connected: " + a;
+        contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
+        usdt = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
+        log("Wallet Connected Successfully");
+        fetchData();
     }
 
-    // Approve & Deposit
-    async function approveUSDT() {
+    async function register() {
         try {
-            const val = ethers.utils.parseUnits(document.getElementById("depAmount").value, 18);
+            const u = document.getElementById("regUser").value;
+            const r = document.getElementById("regRef").value;
+            log(`Attempting Registration for ${u}...`);
+            const tx = await contract.register(u, r);
+            log("Transaction Sent... Hash: " + tx.hash);
+            await tx.wait();
+            log("✅ Registration Confirmed!");
+        } catch (e) { log(e.reason || e.message, true); }
+    }
+
+    async function approve() {
+        try {
+            const amt = ethers.utils.parseEther(document.getElementById("depAmt").value);
             log("Approving USDT...");
-            const tx = await usdt.approve(CONTRACT_ADDRESS, val);
+            const tx = await usdt.approve(CONTRACT_ADDR, amt);
             await tx.wait();
             log("✅ USDT Approved!");
-        } catch (e) { log("❌ Error: " + e.message); }
+        } catch (e) { log(e.message, true); }
     }
 
     async function deposit() {
         try {
-            const val = ethers.utils.parseUnits(document.getElementById("depAmount").value, 18);
-            log("Depositing Funds...");
-            const tx = await contract.deposit(val);
+            const amt = ethers.utils.parseEther(document.getElementById("depAmt").value);
+            log("Sending Deposit...");
+            const tx = await contract.deposit(amt);
             await tx.wait();
-            log("✅ Deposit Successful!");
-            getUserStats();
-        } catch (e) { log("❌ Error: " + e.message); }
+            log("✅ Deposit Success!");
+            fetchData();
+        } catch (e) { log(e.message, true); }
     }
 
-    // Fetch User Stats
-    async function getUserStats() {
+    async function fetchData() {
         try {
-            const addr = await signer.getAddress();
-            const u = await contract.users(addr);
-            const ex = await contract.usersExtra(addr);
+            const a = await signer.getAddress();
+            const u = await contract.users(a);
+            const ex = await contract.usersExtra(a);
             const rName = await contract.getRankName(ex.rank);
 
-            document.getElementById("isReg").innerText = u.registered ? "Yes" : "No";
-            document.getElementById("totalDep").innerText = ethers.utils.formatEther(u.totalDeposited) + " USDT";
-            document.getElementById("activeDep").innerText = ethers.utils.formatEther(u.totalActiveDeposit) + " USDT";
-            document.getElementById("totalWith").innerText = ethers.utils.formatEther(u.totalWithdrawn) + " USDT";
-            document.getElementById("userRank").innerText = rName;
-            document.getElementById("teamCount").innerText = ex.teamCount;
-
-            // Avail Calc
+            document.getElementById("st_name").innerText = u.username || "Not Registered";
+            document.getElementById("st_rank").innerText = rName;
+            document.getElementById("st_active").innerText = ethers.utils.formatEther(u.totalActiveDeposit);
+            document.getElementById("st_team").innerText = ex.teamCount;
+            
             const daily = ethers.utils.formatEther(ex.reserveDailyCapital.add(ex.reserveDailyROI));
             const net = ethers.utils.formatEther(ex.rewardsReferral.add(ex.rewardsOnboarding).add(ex.rewardsRank).add(ex.reserveNetwork));
             
-            document.getElementById("dailyAvail").innerText = daily + " USDT";
-            document.getElementById("netAvail").innerText = net + " USDT";
-
-            log("Stats Updated.");
-        } catch (e) { log("❌ Stats Error: " + e.message); }
+            document.getElementById("st_daily").innerText = parseFloat(daily).toFixed(4);
+            document.getElementById("st_net").innerText = parseFloat(net).toFixed(4);
+            log("Data Refreshed.");
+        } catch (e) { log("Fetch Error: Check Network/Address", true); }
     }
 
-    // Operations
-    async function claimDaily() { 
-        try { const tx = await contract.claimDailyReward(0); await tx.wait(); log("✅ Daily Claimed!"); getUserStats(); } catch(e){ log("❌ Error: " + e.message); }
-    }
-    async function compoundDaily() { 
-        try { const tx = await contract.compoundDailyReward(0); await tx.wait(); log("✅ Daily Compounded!"); getUserStats(); } catch(e){ log("❌ Error: " + e.message); }
-    }
-    async function claimNetwork() { 
-        try { const tx = await contract.claimNetworkReward(0); await tx.wait(); log("✅ Network Claimed!"); getUserStats(); } catch(e){ log("❌ Error: " + e.message); }
-    }
-    async function compoundNetwork() { 
-        try { const tx = await contract.compoundNetworkReward(0); await tx.wait(); log("✅ Network Compounded!"); getUserStats(); } catch(e){ log("❌ Error: " + e.message); }
-    }
+    async function claimDaily() { try { const tx = await contract.claimDailyReward(0); await tx.wait(); log("Claimed!"); fetchData(); } catch(e){log(e.message, true);}}
+    async function compoundDaily() { try { const tx = await contract.compoundDailyReward(0); await tx.wait(); log("Compounded!"); fetchData(); } catch(e){log(e.message, true);}}
+    async function claimNetwork() { try { const tx = await contract.claimNetworkReward(0); await tx.wait(); log("Net Claimed!"); fetchData(); } catch(e){log(e.message, true);}}
+    async function compoundNetwork() { try { const tx = await contract.compoundNetworkReward(0); await tx.wait(); log("Net Compounded!"); fetchData(); } catch(e){log(e.message, true);}}
 
 </script>
-
 </body>
 </html>
-
