@@ -26,8 +26,6 @@
         }
 
         .container { max-width: 1100px; margin: auto; }
-        
-        /* Glassmorphism Cards */
         .card { 
             background: var(--card); 
             padding: 20px; 
@@ -36,185 +34,127 @@
             border: 1px solid rgba(255,255,255,0.05); 
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
             position: relative;
-            overflow: hidden;
         }
 
-        .header-card { 
-            text-align: center; 
-            border-top: 4px solid var(--p); 
-            background: linear-gradient(to bottom, rgba(0,255,163,0.05), transparent);
-        }
-
+        .header-card { text-align: center; border-top: 4px solid var(--p); }
         h1, h2, h3 { font-family: 'Orbitron', sans-serif; color: var(--p); margin-top: 0; text-transform: uppercase; letter-spacing: 2px; }
 
-        /* Stats Grid */
         .main-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
         .stat-box { 
             background: rgba(255,255,255,0.03); 
             padding: 20px; 
             border-radius: 15px; 
             border-left: 4px solid #2b2f36;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .stat-box:hover { border-left-color: var(--p); transform: scale(1.02); background: rgba(0,255,163,0.05); }
-        .stat-label { font-size: 13px; color: #848e9c; font-weight: bold; display: block; margin-bottom: 8px; }
+        .stat-label { font-size: 13px; color: #848e9c; font-weight: bold; display: block; }
         .stat-value { font-size: 24px; font-weight: 700; color: #fff; }
-        .stat-value span { color: var(--p); font-size: 14px; margin-left: 5px; }
 
-        /* Buttons & Inputs */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         input, select { 
             width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; 
-            border: 1px solid #2b2f36; background: #0b0e11; color: white; 
-            box-sizing: border-box; font-size: 16px; font-family: inherit;
+            border: 1px solid #2b2f36; background: #0b0e11; color: white; box-sizing: border-box;
         }
         
         button { 
             padding: 15px; border: none; border-radius: 10px; font-weight: 700; 
-            cursor: pointer; transition: 0.3s; font-family: 'Orbitron', sans-serif;
-            text-transform: uppercase; font-size: 12px;
+            cursor: pointer; transition: 0.3s; font-family: 'Orbitron', sans-serif; text-transform: uppercase;
         }
-        .btn-p { background: var(--grad); color: #000; box-shadow: 0 4px 15px rgba(0,255,163,0.3); }
-        .btn-outline { background: transparent; border: 1px solid var(--p); color: var(--p); }
+        .btn-p { background: var(--grad); color: #000; width: 100%; }
+        .btn-outline { background: transparent; border: 1px solid var(--p); color: var(--p); width: 100%; }
         .btn-red { background: #ea3943; color: white; }
         .btn-green { background: #00c853; color: white; }
         .btn-yellow { background: var(--accent); color: black; }
-        button:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+        
+        .hidden { display: none !important; }
+        .rank-badge { background: var(--accent); color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; }
+        .console { background: #000; color: #00ffa3; padding: 15px; height: 100px; overflow-y: auto; border-radius: 10px; font-family: monospace; font-size: 12px; margin-top: 20px; }
 
-        /* Rank Badge */
-        .rank-badge {
-            background: var(--accent); color: black; padding: 5px 15px;
-            border-radius: 20px; font-weight: bold; font-size: 14px; display: inline-block; margin-top: 10px;
-        }
-
-        /* Table Style */
-        .table-container { overflow-x: auto; margin-top: 15px; border-radius: 10px; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th { background: #0b0e11; color: var(--p); padding: 15px; text-align: left; border-bottom: 2px solid #2b2f36; }
-        td { padding: 15px; border-bottom: 1px solid #1e2329; font-size: 14px; }
-
-        .console { 
-            background: #000; color: #00ffa3; padding: 15px; height: 100px; 
-            overflow-y: auto; border-radius: 10px; font-family: 'Courier New', monospace; 
-            font-size: 12px; border: 1px solid #2b2f36; margin-top: 20px;
-        }
-
-        .live-indicator {
-            display: inline-flex; align-items: center; font-size: 11px;
-            color: #ea3943; background: rgba(234,57,67,0.1); padding: 4px 10px; border-radius: 20px;
-        }
-        .dot { height: 6px; width: 6px; background: #ea3943; border-radius: 50%; margin-right: 6px; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
-
-        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } .stat-value { font-size: 20px; } }
+        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-
-
 <div class="container">
     <div class="card header-card">
         <h1 id="st_name">DigiexDefai Pro</h1>
-        <p id="walletDisplay" style="color: #848e9c; letter-spacing: 1px;">Please Connect Your Web3 Wallet</p>
-        <div id="rankDisplay" class="rank-badge" style="display:none">Rank: Inviter</div>
-        <br><br>
-        <button class="btn-p" onclick="connect()" id="connBtn">Connect Wallet</button>
-        
-        <div id="referralBox" style="display:none; margin-top: 20px;">
-            <p style="font-size: 12px; color: var(--p);">Your Referral Link:</p>
-            <div style="display: flex; gap: 5px; justify-content: center;">
-                <input type="text" id="refLink" readonly style="max-width: 300px; margin: 0; text-align: center;">
-                <button class="btn-yellow" style="padding: 10px;" onclick="copyRef()">Copy</button>
-            </div>
+        <p id="walletDisplay" style="color: #848e9c;">Connect your wallet to start</p>
+        <button class="btn-p" onclick="connect()" id="connBtn" style="max-width: 300px;">Connect Wallet</button>
+        <div id="rankDisplay" class="rank-badge hidden">Rank: Investor</div>
+    </div>
+
+    <div id="regSection" class="card hidden">
+        <h2 style="text-align: center;">Account Registration</h2>
+        <p style="text-align: center; color: #848e9c;">Join the next generation of DeFi</p>
+        <div style="max-width: 500px; margin: auto;">
+            <label>Choose Username</label>
+            <input type="text" id="regUser" placeholder="Min 3 characters">
+            <label>Referrer Username</label>
+            <input type="text" id="regRef" placeholder="Referrer ID">
+            <button class="btn-p" onclick="register()">Create Account</button>
         </div>
     </div>
 
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3>Financial Overview</h3>
-            <div class="live-indicator"><span class="dot"></span> LIVE NETWORK</div>
-        </div>
-        <div class="main-stats">
-            <div class="stat-box">
-                <span class="stat-label">My Total Investment</span>
-                <span class="stat-value" id="st_total_dep">0.00 <span>USDT</span></span>
-            </div>
-            <div class="stat-box" style="border-left-color: var(--p);">
-                <span class="stat-label">Active Capital</span>
-                <span class="stat-value" id="st_active">0.00 <span>USDT</span></span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">Total Earnings</span>
-                <span class="stat-value" id="st_total_earned">0.00 <span>USDT</span></span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">Withdrawable Daily</span>
-                <span class="stat-value" id="st_withdrawable_roi" style="color: var(--p);">0.0000 <span>USDT</span></span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">Network Rewards</span>
-                <span class="stat-value" id="st_net_income">0.00 <span>USDT</span></span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">Team Count</span>
-                <span class="stat-value" id="st_team_count">0 <span>Users</span></span>
-            </div>
-        </div>
-        <button class="btn-outline" onclick="fetchData()" style="width: 100%; margin-top: 15px;">Refresh Live Data</button>
-    </div>
-
-    <div class="grid-2">
+    <div id="mainDashboard" class="hidden">
         <div class="card">
-            <h3>New Deposit</h3>
-            <input type="number" id="depAmt" placeholder="Amount (Min 1 USDT)">
-            <div class="grid-2">
-                <button class="btn-outline" onclick="approve()">1. Approve</button>
-                <button class="btn-p" onclick="deposit()">2. Deposit</button>
+            <div id="referralBox" style="margin-bottom: 20px; text-align: center; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <p style="font-size: 12px; color: var(--p);">Share & Earn (Referral Link):</p>
+                <div style="display: flex; gap: 5px; justify-content: center;">
+                    <input type="text" id="refLink" readonly style="max-width: 350px; margin: 0; text-align: center; height: 40px;">
+                    <button class="btn-yellow" style="padding: 0 20px; height: 40px;" onclick="copyRef()">Copy</button>
+                </div>
             </div>
-            <p style="font-size: 11px; color: #848e9c; margin-top: 10px;">*5% Admin Fee applies on new deposits/compounds.</p>
+
+            <div class="main-stats">
+                <div class="stat-box"><span class="stat-label">Total Investment</span><span class="stat-value" id="st_total_dep">0.00 <span>USDT</span></span></div>
+                <div class="stat-box" style="border-left-color: var(--p);"><span class="stat-label">Active Capital</span><span class="stat-value" id="st_active">0.00 <span>USDT</span></span></div>
+                <div class="stat-box"><span class="stat-label">Total Earnings</span><span class="stat-value" id="st_total_earned">0.00 <span>USDT</span></span></div>
+                <div class="stat-box"><span class="stat-label">Withdrawable Daily</span><span class="stat-value" id="st_withdrawable_roi" style="color: var(--p);">0.0000 <span>USDT</span></span></div>
+                <div class="stat-box"><span class="stat-label">Network Income</span><span class="stat-value" id="st_net_income">0.00 <span>USDT</span></span></div>
+                <div class="stat-box"><span class="stat-label">Team Size</span><span class="stat-value" id="st_team_count">0 <span>Users</span></span></div>
+            </div>
+            <button class="btn-outline" onclick="fetchData()" style="margin-top: 15px;">Refresh Live Data</button>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>New Deposit</h3>
+                <input type="number" id="depAmt" placeholder="Amount (Min 1 USDT)">
+                <div class="grid-2">
+                    <button class="btn-outline" onclick="approve()">1. Approve</button>
+                    <button class="btn-p" onclick="deposit()">2. Deposit</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Rewards</h3>
+                <div class="grid-2">
+                    <button class="btn-red" onclick="claimDaily()">Claim Daily</button>
+                    <button class="btn-green" onclick="compoundDaily()">Comp Daily</button>
+                    <button class="btn-red" onclick="claimNetwork()">Claim Net</button>
+                    <button class="btn-green" onclick="compoundNetwork()">Comp Net</button>
+                </div>
+                <button class="btn-outline" onclick="withdrawPrincipal()" style="width: 100%; margin-top: 10px; border-color: #ea3943; color: #ea3943;">Emergency Exit (-20%)</button>
+            </div>
         </div>
 
         <div class="card">
-            <h3>Reward Management</h3>
-            <div class="grid-2" style="grid-template-rows: auto auto;">
-                <button class="btn-red" onclick="claimDaily()">Claim Daily</button>
-                <button class="btn-green" onclick="compoundDaily()">Comp Daily</button>
-                <button class="btn-red" onclick="claimNetwork()">Claim Net</button>
-                <button class="btn-green" onclick="compoundNetwork()">Comp Net</button>
+            <h3>Network Explorer</h3>
+            <div class="grid-2" style="grid-template-columns: 2fr 1fr;">
+                <select id="levelSel">
+                    <script>for(let i=1; i<=25; i++) document.write(`<option value="${i}">Level ${i}</option>`);</script>
+                </select>
+                <button class="btn-p" onclick="loadTeam()">View</button>
             </div>
-            <button class="btn-outline" onclick="withdrawPrincipal()" style="width: 100%; margin-top: 10px; border-color: #ea3943; color: #ea3943;">Emergency Principal Exit (20% Fee)</button>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; margin-top: 10px; border-collapse: collapse;">
+                    <thead><tr style="text-align: left; color: var(--p);"><th>User</th><th>Active</th><th>Business</th></tr></thead>
+                    <tbody id="teamBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div class="card">
-        <h3>Network Explorer (25 Levels)</h3>
-        <div class="grid-2" style="grid-template-columns: 2fr 1fr;">
-            <select id="levelSel">
-                <script>
-                    for(let i=1; i<=25; i++) document.write(`<option value="${i}">Explore Level ${i}</option>`);
-                </script>
-            </select>
-            <button class="btn-p" onclick="loadTeam()">View Team</button>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Wallet</th>
-                        <th>Active Deposit</th>
-                        <th>Team Business</th>
-                    </tr>
-                </thead>
-                <tbody id="teamBody">
-                    <tr><td colspan="4" style="text-align:center; color: #848e9c;">Select level and click View Team</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="console" id="log">System: Ready for Web3 Connection...</div>
+    <div class="console" id="log">System Ready...</div>
 </div>
 
 <script>
@@ -222,10 +162,10 @@
     const USDT_ADDR = "0x3b66b1e08f55af26c8ea14a73da64b6bc8d799de";
 
     const ABI = [
+        "function register(string u, string r) external",
         "function users(address) view returns (address referrer, string username, bool registered, uint256 joinDate, uint256 totalActiveDeposit, uint256 teamActiveDeposit, uint256 teamTotalDeposit, uint256 totalDeposited, uint256 totalWithdrawn, uint256 totalEarnings)",
         "function usersExtra(address) view returns (uint256 rewardsReferral, uint256 rewardsOnboarding, uint256 rewardsRank, uint256 reserveDailyCapital, uint256 reserveDailyROI, uint256 reserveNetwork, uint32 teamCount, uint32 directsCount, uint32 directsQuali, uint8 rank)",
         "function getLiveBalance(address uA) view returns (uint256 pendingROI, uint256 pendingCap)",
-        "function getLevelTeamDetails(address _upline, uint256 _level) view returns (string[] names, address[] wallets, uint256[] joinDates, uint256[] activeDeps, uint256[] teamTotalDeps, uint256[] teamActiveDeps, uint256[] withdrawals)",
         "function deposit(uint256 a) external",
         "function approve(address s, uint256 a) returns (bool)",
         "function claimDailyReward(uint256 a) external",
@@ -233,10 +173,11 @@
         "function claimNetworkReward(uint256 a) external",
         "function compoundNetworkReward(uint256 a) external",
         "function withdrawPrincipal() external",
-        "function getRankName(uint8 r) view returns (string)"
+        "function getRankName(uint8 r) view returns (string)",
+        "function getLevelTeamDetails(address _upline, uint256 _level) view returns (string[] names, address[] wallets, uint256[] joinDates, uint256[] activeDeps, uint256[] teamTotalDeps, uint256[] teamActiveDeps, uint256[] withdrawals)"
     ];
 
-    const USDT_ABI = ["function approve(address s, uint256 a) returns (bool)", "function allowance(address o, address s) view returns (uint256)"];
+    const USDT_ABI = ["function approve(address s, uint256 a) returns (bool)"];
 
     let signer, contract, usdt, userAddress;
 
@@ -247,104 +188,97 @@
     }
 
     async function connect() {
-        if(!window.ethereum) return alert("Please install MetaMask!");
+        if(!window.ethereum) return alert("Install MetaMask");
         try {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
             signer = provider.getSigner();
             userAddress = await signer.getAddress();
-            
             contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
             usdt = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
 
-            document.getElementById("walletDisplay").innerText = `Connected: ${userAddress.substring(0,6)}...${userAddress.substring(38)}`;
-            document.getElementById("connBtn").style.display = "none";
-            document.getElementById("referralBox").style.display = "block";
+            document.getElementById("connBtn").classList.add("hidden");
+            document.getElementById("walletDisplay").innerText = "Wallet: " + userAddress.substring(0,6)+"..."+userAddress.substring(38);
             
-            log("Wallet Connected: " + userAddress);
-            await fetchData();
-            setInterval(fetchData, 30000);
+            // Check Registration
+            const u = await contract.users(userAddress);
+            if(u.registered) {
+                showDashboard();
+            } else {
+                showRegistration();
+            }
         } catch (e) { log(e.message, true); }
     }
 
+    function showRegistration() {
+        document.getElementById("regSection").classList.remove("hidden");
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('ref')) document.getElementById("regRef").value = urlParams.get('ref');
+        log("New user detected. Please register.");
+    }
+
+    async function register() {
+        const user = document.getElementById("regUser").value;
+        const ref = document.getElementById("regRef").value || "admin";
+        if(user.length < 3) return alert("Username too short");
+        try {
+            log("Sending registration...");
+            const tx = await contract.register(user, ref);
+            await tx.wait();
+            log("Registered successfully!");
+            showDashboard();
+        } catch (e) { log(e.message, true); }
+    }
+
+    function showDashboard() {
+        document.getElementById("regSection").classList.add("hidden");
+        document.getElementById("mainDashboard").classList.remove("hidden");
+        fetchData();
+        setInterval(fetchData, 30000);
+    }
+
     async function fetchData() {
-        if(!contract) return;
         try {
             const u = await contract.users(userAddress);
             const ex = await contract.usersExtra(userAddress);
             const live = await contract.getLiveBalance(userAddress);
-            const rankName = await contract.getRankName(ex.rank);
+            const rank = await contract.getRankName(ex.rank);
 
-            // UI Updates
-            document.getElementById("st_name").innerText = "HELLO, " + (u.username || "INVESTOR");
-            document.getElementById("st_active").innerText = ethers.utils.formatEther(u.totalActiveDeposit);
+            document.getElementById("st_name").innerText = "HELLO, " + u.username;
             document.getElementById("st_total_dep").innerText = ethers.utils.formatEther(u.totalDeposited);
+            document.getElementById("st_active").innerText = ethers.utils.formatEther(u.totalActiveDeposit);
             document.getElementById("st_total_earned").innerText = ethers.utils.formatEther(u.totalEarnings);
-            document.getElementById("st_net_income").innerText = ethers.utils.formatEther(ex.rewardsReferral.add(ex.rewardsOnboarding).add(ex.rewardsRank));
             document.getElementById("st_withdrawable_roi").innerText = parseFloat(ethers.utils.formatEther(live.pendingROI.add(live.pendingCap))).toFixed(4);
+            document.getElementById("st_net_income").innerText = ethers.utils.formatEther(ex.rewardsReferral.add(ex.rewardsOnboarding).add(ex.rewardsRank));
             document.getElementById("st_team_count").innerText = ex.teamCount;
             
-            document.getElementById("rankDisplay").innerText = "Rank: " + rankName;
-            document.getElementById("rankDisplay").style.display = "inline-block";
+            document.getElementById("rankDisplay").innerText = "Rank: " + rank;
+            document.getElementById("rankDisplay").classList.remove("hidden");
             
-            const loc = window.location.href.split('?')[0];
-            document.getElementById("refLink").value = `${loc}?ref=${u.username}`;
-
-        } catch (e) { console.error("Update Error:", e); }
+            document.getElementById("refLink").value = window.location.origin + window.location.pathname + "?ref=" + u.username;
+        } catch (e) { console.error(e); }
     }
 
+    // Logic for buttons (Approve, Deposit, etc.)
     async function approve() {
         try {
             const amt = ethers.utils.parseEther(document.getElementById("depAmt").value);
-            log("Wait: Approving USDT...");
+            log("Approving USDT...");
             const tx = await usdt.approve(CONTRACT_ADDR, amt);
             await tx.wait();
-            log("Success: USDT Approved!");
-        } catch (e) { log(e.message, true); }
+            log("Approved!");
+        } catch(e) { log(e.message, true); }
     }
 
     async function deposit() {
         try {
             const amt = ethers.utils.parseEther(document.getElementById("depAmt").value);
-            log("Wait: Processing Deposit...");
+            log("Depositing...");
             const tx = await contract.deposit(amt);
             await tx.wait();
-            log("Success: Deposit Confirmed!");
+            log("Deposit Success!");
             fetchData();
-        } catch (e) { log(e.message, true); }
-    }
-
-    async function withdrawPrincipal() {
-        if(!confirm("Are you sure? This will close all positions and charge 20% fee on remaining capital.")) return;
-        try {
-            const tx = await contract.withdrawPrincipal();
-            await tx.wait();
-            log("Success: Principal Withdrawn!");
-            fetchData();
-        } catch (e) { log(e.message, true); }
-    }
-
-    async function loadTeam() {
-        const level = document.getElementById("levelSel").value;
-        const tbody = document.getElementById("teamBody");
-        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Scanning Blockchain...</td></tr>";
-        try {
-            const data = await contract.getLevelTeamDetails(userAddress, level);
-            tbody.innerHTML = "";
-            if(data.names.length === 0) {
-                tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No partners at this level yet.</td></tr>";
-                return;
-            }
-            for(let i=0; i<data.names.length; i++) {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${data.names[i]}</td>
-                        <td>${data.wallets[i].substring(0,6)}...</td>
-                        <td>${ethers.utils.formatEther(data.activeDeps[i])} USDT</td>
-                        <td>${ethers.utils.formatEther(data.teamActiveDeps[i])} USDT</td>
-                    </tr>`;
-            }
-        } catch (e) { log("Team fetch failed", true); }
+        } catch(e) { log(e.message, true); }
     }
 
     function copyRef() {
@@ -354,12 +288,26 @@
         alert("Referral link copied!");
     }
 
-    // Reward Actions
-    async function claimDaily() { try { const tx = await contract.claimDailyReward(0); await tx.wait(); log("Daily Reward Claimed!"); fetchData(); } catch(e){ log(e.message, true); } }
-    async function compoundDaily() { try { const tx = await contract.compoundDailyReward(0); await tx.wait(); log("Daily Reward Compounded!"); fetchData(); } catch(e){ log(e.message, true); } }
-    async function claimNetwork() { try { const tx = await contract.claimNetworkReward(0); await tx.wait(); log("Network Rewards Claimed!"); fetchData(); } catch(e){ log(e.message, true); } }
-    async function compoundNetwork() { try { const tx = await contract.compoundNetworkReward(0); await tx.wait(); log("Network Rewards Compounded!"); fetchData(); } catch(e){ log(e.message, true); } }
-</script>
+    async function loadTeam() {
+        const lvl = document.getElementById("levelSel").value;
+        const body = document.getElementById("teamBody");
+        body.innerHTML = "Loading...";
+        try {
+            const data = await contract.getLevelTeamDetails(userAddress, lvl);
+            body.innerHTML = "";
+            for(let i=0; i<data.names.length; i++) {
+                body.innerHTML += `<tr><td>${data.names[i]}</td><td>${ethers.utils.formatEther(data.activeDeps[i])}</td><td>${ethers.utils.formatEther(data.teamActiveDeps[i])}</td></tr>`;
+            }
+            if(data.names.length == 0) body.innerHTML = "No team members found.";
+        } catch(e) { log("Fetch failed", true); }
+    }
 
+    // Simple wrappers for reward functions
+    async function claimDaily() { const tx = await contract.claimDailyReward(0); await tx.wait(); fetchData(); }
+    async function compoundDaily() { const tx = await contract.compoundDailyReward(0); await tx.wait(); fetchData(); }
+    async function claimNetwork() { const tx = await contract.claimNetworkReward(0); await tx.wait(); fetchData(); }
+    async function compoundNetwork() { const tx = await contract.compoundNetworkReward(0); await tx.wait(); fetchData(); }
+    async function withdrawPrincipal() { if(confirm("20% fee?")) { const tx = await contract.withdrawPrincipal(); await tx.wait(); fetchData(); } }
+</script>
 </body>
 </html>
