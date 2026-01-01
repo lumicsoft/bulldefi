@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DigiexDefai | Ultra Pro V2 Full</title>
+    <title>DigiexDefai | Ultra Pro V2 Full + History</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
@@ -31,9 +31,17 @@
         @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .rank-badge { background: var(--accent); color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; font-size: 14px; }
         .console { background: #000; color: #00ffa3; padding: 15px; height: 100px; overflow-y: auto; border-radius: 10px; font-family: monospace; font-size: 12px; margin-top: 20px; border: 1px solid #222; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
-        th { text-align: left; color: var(--p); padding: 12px; border-bottom: 2px solid #2b2f36; }
+        
+        /* Table Styles */
+        .table-wrap { overflow-x: auto; margin-top: 10px; border-radius: 10px; background: rgba(0,0,0,0.2); }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { text-align: left; color: var(--p); padding: 12px; border-bottom: 2px solid #2b2f36; font-size: 12px; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid #1e2329; color: #fff; }
+        .type-label { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .type-deposit { background: rgba(0, 255, 163, 0.1); color: #00ffa3; }
+        .type-withdraw { background: rgba(234, 57, 67, 0.1); color: #ea3943; }
+        .type-compound { background: rgba(240, 185, 11, 0.1); color: #f0b90b; }
+        
         @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -83,7 +91,7 @@
                 <div class="stat-box"><span class="stat-label">NETWORK INCOME</span><span class="stat-value" id="st_net_income">0.00 <span>USDT</span></span></div>
                 <div class="stat-box"><span class="stat-label">TEAM MEMBERS</span><span class="stat-value" id="st_team_count">0 <span>Users</span></span></div>
             </div>
-            <button class="btn-outline" onclick="fetchData()" style="margin-top: 15px;">REFRESH DATA</button>
+            <button class="btn-outline" onclick="fetchData(); fetchHistory();" style="margin-top: 15px;">REFRESH DATA</button>
         </div>
 
         <div id="actionGrid" class="grid-2">
@@ -110,6 +118,24 @@
         </div>
 
         <div class="card">
+            <h3>Transaction History</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Transaction Hash</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr><td colspan="3" style="text-align:center; color:#848e9c;">Connecting to blockchain...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
             <h3>Network Explorer</h3>
             <div class="grid-2" style="grid-template-columns: 2fr 1fr; align-items: center;">
                 <select id="levelSel" style="margin: 0;">
@@ -117,7 +143,7 @@
                 </select>
                 <button class="btn-p" onclick="loadTeam()">Expand View</button>
             </div>
-            <div style="overflow-x: auto;">
+            <div class="table-wrap">
                 <table>
                     <thead><tr><th>MEMBER</th><th>ACTIVE DEP</th><th>STATUS</th><th>BUSINESS</th></tr></thead>
                     <tbody id="teamBody"></tbody>
@@ -135,6 +161,10 @@
     const RPC_URL = "https://polygon-rpc.com"; 
 
     const ABI = [
+        "event NewDeposit(address indexed user, uint256 amount)",
+        "event WithdrawnROI(address indexed user, uint256 amount)",
+        "event CompoundedROI(address indexed user, uint256 amount)",
+        "event PrincipalWithdrawn(address indexed user, uint256 amount)",
         "function usernameToAddress(string) view returns (address)",
         "function register(string u, string r) external",
         "function users(address) view returns (address referrer, string username, bool registered, uint256 joinDate, uint256 totalActiveDeposit, uint256 teamActiveDeposit, uint256 teamTotalDeposit, uint256 totalDeposited, uint256 totalWithdrawn, uint256 totalEarnings)",
@@ -154,7 +184,6 @@
 
     let provider, contract, usdt, userAddress, isViewMode = false;
 
-    // Initialization
     provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     contract = new ethers.Contract(CONTRACT_ADDR, ABI, provider);
 
@@ -185,6 +214,7 @@
             document.getElementById("mainDashboard").classList.remove("hidden");
             
             fetchData();
+            fetchHistory();
             log("View Mode Active: " + input);
         } catch (e) { alert(e.message); }
     }
@@ -210,6 +240,7 @@
             document.getElementById("regSection").classList.add("hidden");
             document.getElementById("mainDashboard").classList.remove("hidden");
             fetchData();
+            fetchHistory();
             setInterval(fetchData, 15000);
         } else {
             document.getElementById("regSection").classList.remove("hidden");
@@ -244,6 +275,43 @@
         } catch (e) { console.error(e); }
     }
 
+    async function fetchHistory() {
+        const body = document.getElementById("historyBody");
+        try {
+            const depFilter = contract.filters.NewDeposit(userAddress);
+            const withFilter = contract.filters.WithdrawnROI(userAddress);
+            const compFilter = contract.filters.CompoundedROI(userAddress);
+            const princFilter = contract.filters.PrincipalWithdrawn(userAddress);
+
+            const [deps, withs, comps, princs] = await Promise.all([
+                contract.queryFilter(depFilter, -5000),
+                contract.queryFilter(withFilter, -5000),
+                contract.queryFilter(compFilter, -5000),
+                contract.queryFilter(princFilter, -5000)
+            ]);
+
+            let events = [
+                ...deps.map(e => ({ type: 'DEPOSIT', amount: e.args.amount, hash: e.transactionHash, cls: 'type-deposit' })),
+                ...withs.map(e => ({ type: 'WITHDRAWAL', amount: e.args.amount, hash: e.transactionHash, cls: 'type-withdraw' })),
+                ...comps.map(e => ({ type: 'COMPOUND', amount: e.args.amount, hash: e.transactionHash, cls: 'type-compound' })),
+                ...princs.map(e => ({ type: 'PRINCIPAL EXIT', amount: e.args.amount, hash: e.transactionHash, cls: 'type-withdraw' }))
+            ];
+
+            if(events.length === 0) {
+                body.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No recent activity</td></tr>";
+                return;
+            }
+
+            body.innerHTML = events.sort((a,b) => 0.5 - Math.random()).slice(0,10).map(ev => `
+                <tr>
+                    <td><span class="type-label ${ev.cls}">${ev.type}</span></td>
+                    <td>${ethers.utils.formatEther(ev.amount)} USDT</td>
+                    <td><a href="https://polygonscan.com/tx/${ev.hash}" target="_blank" style="color:var(--p); font-size:11px;">${ev.hash.substring(0,15)}...</a></td>
+                </tr>
+            `).join('');
+        } catch(e) { body.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Unable to load history</td></tr>"; }
+    }
+
     async function loadTeam() {
         const lvl = document.getElementById("levelSel").value;
         const body = document.getElementById("teamBody");
@@ -258,7 +326,6 @@
         } catch(e) { log("Sync error", true); }
     }
 
-    // Action Functions (Disabled in View Mode)
     async function register() {
         if(isViewMode) return;
         try {
@@ -291,6 +358,7 @@
             await tx.wait();
             log("✅ Success!");
             fetchData();
+            fetchHistory();
         } catch(e) { log(e.message, true); }
     }
 
@@ -302,14 +370,15 @@
                 await tx.wait();
                 log("✅ Exit Success");
                 fetchData();
+                fetchHistory();
             } catch(e) { log(e.message, true); }
         }
     }
 
-    async function claimDaily() { if(isViewMode) return; const tx = await contract.claimDailyReward(0); await tx.wait(); fetchData(); }
-    async function compoundDaily() { if(isViewMode) return; const tx = await contract.compoundDailyReward(0); await tx.wait(); fetchData(); }
-    async function claimNetwork() { if(isViewMode) return; const tx = await contract.claimNetworkReward(0); await tx.wait(); fetchData(); }
-    async function compoundNetwork() { if(isViewMode) return; const tx = await contract.compoundNetworkReward(0); await tx.wait(); fetchData(); }
+    async function claimDaily() { if(isViewMode) return; const tx = await contract.claimDailyReward(0); await tx.wait(); fetchData(); fetchHistory(); }
+    async function compoundDaily() { if(isViewMode) return; const tx = await contract.compoundDailyReward(0); await tx.wait(); fetchData(); fetchHistory(); }
+    async function claimNetwork() { if(isViewMode) return; const tx = await contract.claimNetworkReward(0); await tx.wait(); fetchData(); fetchHistory(); }
+    async function compoundNetwork() { if(isViewMode) return; const tx = await contract.compoundNetworkReward(0); await tx.wait(); fetchData(); fetchHistory(); }
     function copyRef() { const c = document.getElementById("refLink"); c.select(); document.execCommand("copy"); log("Referral Copied!"); }
 </script>
 </body>
