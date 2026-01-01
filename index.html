@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DigiexDefai | Ultra Pro V2 Full + History</title>
+    <title>DigiexDefai | BSC Testnet Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
@@ -17,7 +17,6 @@
         .stat-box { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; border-left: 4px solid #2b2f36; }
         .stat-label { font-size: 13px; color: #848e9c; font-weight: bold; display: block; }
         .stat-value { font-size: 24px; font-weight: 700; color: #fff; }
-        .stat-value span { color: var(--p); font-size: 14px; margin-left: 5px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         input, select { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #2b2f36; background: #0b0e11; color: white; box-sizing: border-box; }
         button { padding: 15px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: 'Orbitron', sans-serif; text-transform: uppercase; }
@@ -31,17 +30,14 @@
         @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .rank-badge { background: var(--accent); color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; font-size: 14px; }
         .console { background: #000; color: #00ffa3; padding: 15px; height: 100px; overflow-y: auto; border-radius: 10px; font-family: monospace; font-size: 12px; margin-top: 20px; border: 1px solid #222; }
-        
-        /* Table Styles */
         .table-wrap { overflow-x: auto; margin-top: 10px; border-radius: 10px; background: rgba(0,0,0,0.2); }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { text-align: left; color: var(--p); padding: 12px; border-bottom: 2px solid #2b2f36; font-size: 12px; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #1e2329; color: #fff; }
-        .type-label { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        th { text-align: left; color: var(--p); padding: 12px; border-bottom: 2px solid #2b2f36; font-size: 12px; }
+        td { padding: 12px; border-bottom: 1px solid #1e2329; color: #fff; font-size: 13px; }
+        .type-label { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         .type-deposit { background: rgba(0, 255, 163, 0.1); color: #00ffa3; }
         .type-withdraw { background: rgba(234, 57, 67, 0.1); color: #ea3943; }
         .type-compound { background: rgba(240, 185, 11, 0.1); color: #f0b90b; }
-        
         @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -49,20 +45,18 @@
 
 <div class="container">
     <div class="card header-card">
-        <h1 id="st_name_top">DigiexDefai Pro</h1>
-        
+        <h1>DigiexDefai <span style="font-size: 12px; color: var(--accent);">[BSC TESTNET]</span></h1>
         <div style="max-width: 600px; margin: 15px auto; display: flex; gap: 5px;">
             <input type="text" id="viewInput" placeholder="Enter Username or Address" style="margin:0;">
             <button class="btn-yellow" onclick="handleSearch()" style="padding: 0 20px; white-space: nowrap;">VIEW MODE</button>
         </div>
-
         <p id="walletDisplay" style="color: #848e9c;">Web3 Secure Connection Ready</p>
         <button class="btn-p" onclick="connect()" id="connBtn" style="max-width: 300px;">Connect Wallet</button>
         <div id="rankDisplay" class="rank-badge hidden">Rank: Investor</div>
         <button id="exitView" class="btn-outline hidden" onclick="location.reload()" style="max-width:200px; margin: 10px auto; border-color:white; color:white;">Exit View Mode</button>
     </div>
 
-    <div id="viewModeAlert" class="view-mode-banner hidden">⚠️ READ-ONLY ACCESS ENABLED (ACTIONS DISABLED)</div>
+    <div id="viewModeAlert" class="view-mode-banner hidden">⚠️ READ-ONLY ACCESS ENABLED</div>
 
     <div id="regSection" class="card hidden">
         <h2 style="text-align: center;">Account Registration</h2>
@@ -87,7 +81,7 @@
                 <div class="stat-box"><span class="stat-label">TOTAL DEPOSITED</span><span class="stat-value" id="st_total_dep">0.00 <span>USDT</span></span></div>
                 <div class="stat-box" style="border-left-color: var(--p);"><span class="stat-label">ACTIVE CAPITAL</span><span class="stat-value" id="st_active">0.00 <span>USDT</span></span></div>
                 <div class="stat-box"><span class="stat-label">TOTAL EARNINGS</span><span class="stat-value" id="st_total_earned">0.00 <span>USDT</span></span></div>
-                <div class="stat-box"><span class="stat-label">LIVE WITHDRAWABLE ROI</span><span class="stat-value" id="st_withdrawable_roi" style="color: var(--p);">0.0000 <span>USDT</span></span></div>
+                <div class="stat-box"><span class="stat-label">LIVE ROI</span><span class="stat-value" id="st_withdrawable_roi" style="color: var(--p);">0.0000 <span>USDT</span></span></div>
                 <div class="stat-box"><span class="stat-label">NETWORK INCOME</span><span class="stat-value" id="st_net_income">0.00 <span>USDT</span></span></div>
                 <div class="stat-box"><span class="stat-label">TEAM MEMBERS</span><span class="stat-value" id="st_team_count">0 <span>Users</span></span></div>
             </div>
@@ -113,23 +107,19 @@
                     <button class="btn-red" onclick="claimNetwork()">Claim Net</button>
                     <button class="btn-green" onclick="compoundNetwork()">Comp Net</button>
                 </div>
-                <button class="btn-outline" onclick="withdrawPrincipal()" style="width: 100%; margin-top: 15px; border-color: #ea3943; color: #ea3943;">EMERGENCY PRINCIPAL EXIT (-20%)</button>
+                <button class="btn-outline" onclick="withdrawPrincipal()" style="width: 100%; margin-top: 15px; border-color: #ea3943; color: #ea3943;">PRINCIPAL EXIT (-20%)</button>
             </div>
         </div>
 
         <div class="card">
-            <h3>Transaction History</h3>
+            <h3>Transaction History (BSC Testnet)</h3>
             <div class="table-wrap">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Amount</th>
-                            <th>Transaction Hash</th>
-                        </tr>
+                        <tr><th>TYPE</th><th>AMOUNT</th><th>TX HASH</th></tr>
                     </thead>
                     <tbody id="historyBody">
-                        <tr><td colspan="3" style="text-align:center; color:#848e9c;">Connecting to blockchain...</td></tr>
+                        <tr><td colspan="3" style="text-align:center;">Scanning Testnet Blocks...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -152,13 +142,14 @@
         </div>
     </div>
 
-    <div class="console" id="log">SYSTEM STATUS: ENCRYPTED...</div>
+    <div class="console" id="log">CONNECTED TO BSC TESTNET...</div>
 </div>
 
 <script>
+    // BSC TESTNET CONFIGURATION
     const CONTRACT_ADDR = "0x33Ad74E9FB3aeA563baD0Bbe36D3E911c231200A";
     const USDT_ADDR = "0x3b66b1e08f55af26c8ea14a73da64b6bc8d799de";
-    const RPC_URL = "https://polygon-rpc.com"; 
+    const RPC_URL = "https://data-seed-prebsc-1-s1.binance.org:8545/"; 
 
     const ABI = [
         "event NewDeposit(address indexed user, uint256 amount)",
@@ -181,7 +172,6 @@
     ];
 
     const USDT_ABI = ["function approve(address s, uint256 a) returns (bool)"];
-
     let provider, contract, usdt, userAddress, isViewMode = false;
 
     provider = new ethers.providers.JsonRpcProvider(RPC_URL);
@@ -205,17 +195,13 @@
             }
             isViewMode = true;
             userAddress = target;
-            
             document.getElementById("viewModeAlert").classList.remove("hidden");
             document.getElementById("actionGrid").classList.add("hidden");
             document.getElementById("connBtn").classList.add("hidden");
             document.getElementById("exitView").classList.remove("hidden");
-            document.getElementById("copyBtn").classList.add("hidden");
             document.getElementById("mainDashboard").classList.remove("hidden");
-            
             fetchData();
             fetchHistory();
-            log("View Mode Active: " + input);
         } catch (e) { alert(e.message); }
     }
 
@@ -228,24 +214,19 @@
         contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
         usdt = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
         isViewMode = false;
-        
         document.getElementById("connBtn").classList.add("hidden");
-        document.getElementById("walletDisplay").innerText = "CONNECTED: " + userAddress.substring(0,6)+"...";
+        document.getElementById("walletDisplay").innerText = "CONNECTED: " + userAddress.substring(0,8)+"...";
         checkStatus();
     }
 
     async function checkStatus() {
         const u = await contract.users(userAddress);
         if(u.registered) {
-            document.getElementById("regSection").classList.add("hidden");
             document.getElementById("mainDashboard").classList.remove("hidden");
             fetchData();
             fetchHistory();
-            setInterval(fetchData, 15000);
         } else {
             document.getElementById("regSection").classList.remove("hidden");
-            const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.has('ref')) document.getElementById("regRef").value = urlParams.get('ref');
         }
     }
 
@@ -255,131 +236,76 @@
             const ex = await contract.usersExtra(userAddress);
             const live = await contract.getLiveBalance(userAddress);
             const rName = await contract.getRankName(ex.rank);
-
-            document.getElementById("st_name_top").innerText = "HELLO, " + u.username + (isViewMode ? " (VIEW)" : "");
             document.getElementById("st_total_dep").innerText = ethers.utils.formatEther(u.totalDeposited);
             document.getElementById("st_active").innerText = ethers.utils.formatEther(u.totalActiveDeposit);
-            
-            const liveWithdrawable = live.pendingROI.add(live.pendingCap);
+            const liveROI = live.pendingROI.add(live.pendingCap);
+            document.getElementById("st_withdrawable_roi").innerText = parseFloat(ethers.utils.formatEther(liveROI)).toFixed(4);
             const netIncome = ex.rewardsReferral.add(ex.rewardsOnboarding).add(ex.rewardsRank).add(ex.reserveNetwork);
-            const totalEarned = u.totalWithdrawn.add(liveWithdrawable).add(netIncome);
-
-            document.getElementById("st_total_earned").innerText = parseFloat(ethers.utils.formatEther(totalEarned)).toFixed(4);
-            document.getElementById("st_withdrawable_roi").innerText = parseFloat(ethers.utils.formatEther(liveWithdrawable)).toFixed(6);
             document.getElementById("st_net_income").innerText = ethers.utils.formatEther(netIncome);
             document.getElementById("st_team_count").innerText = ex.teamCount;
             document.getElementById("rankDisplay").innerText = "Rank: " + rName;
             document.getElementById("rankDisplay").classList.remove("hidden");
-            
             if(!isViewMode) document.getElementById("refLink").value = window.location.origin + window.location.pathname + "?ref=" + u.username;
         } catch (e) { console.error(e); }
     }
 
     async function fetchHistory() {
-        const body = document.getElementById("historyBody");
+        const hBody = document.getElementById("historyBody");
         try {
-            const depFilter = contract.filters.NewDeposit(userAddress);
-            const withFilter = contract.filters.WithdrawnROI(userAddress);
-            const compFilter = contract.filters.CompoundedROI(userAddress);
-            const princFilter = contract.filters.PrincipalWithdrawn(userAddress);
+            const currentBlock = await provider.getBlockNumber();
+            const fromBlock = currentBlock - 1000; // BSC is faster, scanning 1000 blocks is safer
 
-            const [deps, withs, comps, princs] = await Promise.all([
-                contract.queryFilter(depFilter, -5000),
-                contract.queryFilter(withFilter, -5000),
-                contract.queryFilter(compFilter, -5000),
-                contract.queryFilter(princFilter, -5000)
-            ]);
-
-            let events = [
-                ...deps.map(e => ({ type: 'DEPOSIT', amount: e.args.amount, hash: e.transactionHash, cls: 'type-deposit' })),
-                ...withs.map(e => ({ type: 'WITHDRAWAL', amount: e.args.amount, hash: e.transactionHash, cls: 'type-withdraw' })),
-                ...comps.map(e => ({ type: 'COMPOUND', amount: e.args.amount, hash: e.transactionHash, cls: 'type-compound' })),
-                ...princs.map(e => ({ type: 'PRINCIPAL EXIT', amount: e.args.amount, hash: e.transactionHash, cls: 'type-withdraw' }))
+            const filters = [
+                contract.queryFilter(contract.filters.NewDeposit(userAddress), fromBlock),
+                contract.queryFilter(contract.filters.WithdrawnROI(userAddress), fromBlock),
+                contract.queryFilter(contract.filters.CompoundedROI(userAddress), fromBlock),
+                contract.queryFilter(contract.filters.PrincipalWithdrawn(userAddress), fromBlock)
             ];
 
-            if(events.length === 0) {
-                body.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No recent activity</td></tr>";
+            const results = await Promise.all(filters);
+            let history = [];
+            results[0].forEach(e => history.push({type:'Deposit', amt:e.args.amount, hash:e.transactionHash, cls:'type-deposit'}));
+            results[1].forEach(e => history.push({type:'Withdraw', amt:e.args.amount, hash:e.transactionHash, cls:'type-withdraw'}));
+            results[2].forEach(e => history.push({type:'Compound', amt:e.args.amount, hash:e.transactionHash, cls:'type-compound'}));
+            results[3].forEach(e => history.push({type:'Exit', amt:e.args.amount, hash:e.transactionHash, cls:'type-withdraw'}));
+
+            if(history.length === 0) {
+                hBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No testnet activity in last 1000 blocks</td></tr>";
                 return;
             }
 
-            body.innerHTML = events.sort((a,b) => 0.5 - Math.random()).slice(0,10).map(ev => `
+            hBody.innerHTML = history.reverse().map(ev => `
                 <tr>
                     <td><span class="type-label ${ev.cls}">${ev.type}</span></td>
-                    <td>${ethers.utils.formatEther(ev.amount)} USDT</td>
-                    <td><a href="https://polygonscan.com/tx/${ev.hash}" target="_blank" style="color:var(--p); font-size:11px;">${ev.hash.substring(0,15)}...</a></td>
+                    <td>${ethers.utils.formatEther(ev.amt)} USDT</td>
+                    <td><a href="https://testnet.bscscan.com/tx/${ev.hash}" target="_blank" style="color:var(--p); font-size:10px;">View Transaction</a></td>
                 </tr>
             `).join('');
-        } catch(e) { body.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Unable to load history</td></tr>"; }
+
+        } catch (err) {
+            hBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>BSC Testnet RPC Busy. Retry in a moment.</td></tr>";
+        }
     }
 
     async function loadTeam() {
         const lvl = document.getElementById("levelSel").value;
         const body = document.getElementById("teamBody");
         body.innerHTML = "<tr><td colspan='4'>Syncing...</td></tr>";
-        try {
-            const data = await contract.getLevelTeamDetails(userAddress, lvl);
-            body.innerHTML = "";
-            if(data.names.length == 0) return body.innerHTML = "<tr><td colspan='4' align='center'>Empty Level</td></tr>";
-            for(let i=0; i<data.names.length; i++) {
-                body.innerHTML += `<tr><td>${data.names[i]}</td><td>${ethers.utils.formatEther(data.activeDeps[i])}</td><td>${data.activeDeps[i]>0?'✅ Active':'❌ Inactive'}</td><td>${ethers.utils.formatEther(data.teamTotalDeps[i])}</td></tr>`;
-            }
-        } catch(e) { log("Sync error", true); }
-    }
-
-    async function register() {
-        if(isViewMode) return;
-        try {
-            const user = document.getElementById("regUser").value;
-            const ref = document.getElementById("regRef").value || "admin";
-            log("Registering...");
-            const tx = await contract.register(user, ref);
-            await tx.wait();
-            location.reload();
-        } catch(e) { log(e.message, true); }
-    }
-
-    async function approve() {
-        if(isViewMode) return;
-        try {
-            const amt = ethers.utils.parseEther(document.getElementById("depAmt").value);
-            log("Approving USDT...");
-            const tx = await usdt.approve(CONTRACT_ADDR, amt);
-            await tx.wait();
-            log("✅ Approved!");
-        } catch(e) { log(e.message, true); }
-    }
-
-    async function deposit() {
-        if(isViewMode) return;
-        try {
-            const amt = ethers.utils.parseEther(document.getElementById("depAmt").value);
-            log("Depositing...");
-            const tx = await contract.deposit(amt);
-            await tx.wait();
-            log("✅ Success!");
-            fetchData();
-            fetchHistory();
-        } catch(e) { log(e.message, true); }
-    }
-
-    async function withdrawPrincipal() {
-        if(isViewMode) return;
-        if(confirm("Exit with 20% fee?")) {
-            try {
-                const tx = await contract.withdrawPrincipal();
-                await tx.wait();
-                log("✅ Exit Success");
-                fetchData();
-                fetchHistory();
-            } catch(e) { log(e.message, true); }
+        const data = await contract.getLevelTeamDetails(userAddress, lvl);
+        body.innerHTML = "";
+        for(let i=0; i<data.names.length; i++) {
+            body.innerHTML += `<tr><td>${data.names[i]}</td><td>${ethers.utils.formatEther(data.activeDeps[i])}</td><td>${data.activeDeps[i]>0?'✅':'❌'}</td><td>${ethers.utils.formatEther(data.teamTotalDeps[i])}</td></tr>`;
         }
     }
 
+    async function deposit() { if(isViewMode) return; try { const amt = ethers.utils.parseEther(document.getElementById("depAmt").value); const tx = await contract.deposit(amt); await tx.wait(); fetchData(); fetchHistory(); } catch(e){log(e.message, true);}}
+    async function approve() { if(isViewMode) return; try { const amt = ethers.utils.parseEther(document.getElementById("depAmt").value); const tx = await usdt.approve(CONTRACT_ADDR, amt); await tx.wait(); log("Approved!"); } catch(e){log(e.message, true);}}
     async function claimDaily() { if(isViewMode) return; const tx = await contract.claimDailyReward(0); await tx.wait(); fetchData(); fetchHistory(); }
     async function compoundDaily() { if(isViewMode) return; const tx = await contract.compoundDailyReward(0); await tx.wait(); fetchData(); fetchHistory(); }
     async function claimNetwork() { if(isViewMode) return; const tx = await contract.claimNetworkReward(0); await tx.wait(); fetchData(); fetchHistory(); }
     async function compoundNetwork() { if(isViewMode) return; const tx = await contract.compoundNetworkReward(0); await tx.wait(); fetchData(); fetchHistory(); }
-    function copyRef() { const c = document.getElementById("refLink"); c.select(); document.execCommand("copy"); log("Referral Copied!"); }
+    async function withdrawPrincipal() { if(isViewMode) return; if(confirm("Exit?")) { const tx = await contract.withdrawPrincipal(); await tx.wait(); fetchData(); fetchHistory(); } }
+    function copyRef() { const c = document.getElementById("refLink"); c.select(); document.execCommand("copy"); log("Copied!"); }
 </script>
 </body>
 </html>
