@@ -3,107 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DigiexDefai | Ultra Pro Dashboard</title>
+    <title>DigiexDefai | Ultra Pro Dashboard V2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #00ffa3; --bg: #060809; --card: #121619; --text: #eaecef; --accent: #f0b90b; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; }
-        .card { background: var(--card); padding: 25px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #2b2f36; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .header-card { text-align: center; border-bottom: 3px solid var(--p); }
-        h2, h3 { color: var(--p); margin-top: 0; }
-        .main-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
-        .stat-box { background: #1e2329; padding: 15px; border-radius: 12px; border: 1px solid #333; transition: 0.3s; }
-        .stat-box:hover { border-color: var(--p); transform: translateY(-3px); }
-        .stat-label { font-size: 12px; color: #848e9c; display: block; margin-bottom: 5px; text-transform: uppercase; }
-        .stat-value { font-size: 20px; font-weight: bold; color: white; }
-        .stat-value span { color: var(--p); font-size: 14px; margin-left: 4px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #0b0e11; color: white; box-sizing: border-box; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-p { background: var(--p); color: #000; width: 100%; }
-        .btn-outline { background: transparent; border: 1px solid var(--p); color: var(--p); }
+        :root { 
+            --p: #00ffa3; 
+            --bg: #0b0e11; 
+            --card: #161a1e; 
+            --text: #eaecef; 
+            --accent: #f0b90b;
+            --grad: linear-gradient(135deg, #00ffa3 0%, #00bc77 100%);
+        }
+        
+        body { 
+            font-family: 'Rajdhani', sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding: 10px;
+            background-image: radial-gradient(circle at 10% 20%, rgba(0, 255, 163, 0.05) 0%, transparent 40%);
+        }
+
+        .container { max-width: 1100px; margin: auto; }
+        .card { 
+            background: var(--card); 
+            padding: 20px; 
+            border-radius: 20px; 
+            margin-bottom: 20px; 
+            border: 1px solid rgba(255,255,255,0.05); 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        .header-card { text-align: center; border-top: 4px solid var(--p); }
+        h1, h2, h3 { font-family: 'Orbitron', sans-serif; color: var(--p); margin-top: 0; text-transform: uppercase; letter-spacing: 2px; }
+
+        .main-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+        .stat-box { 
+            background: rgba(255,255,255,0.03); 
+            padding: 20px; 
+            border-radius: 15px; 
+            border-left: 4px solid #2b2f36;
+        }
+        .stat-label { font-size: 13px; color: #848e9c; font-weight: bold; display: block; }
+        .stat-value { font-size: 24px; font-weight: 700; color: #fff; }
+        .stat-value span { color: var(--p); font-size: 14px; margin-left: 5px; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        input, select { 
+            width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; 
+            border: 1px solid #2b2f36; background: #0b0e11; color: white; box-sizing: border-box;
+        }
+        
+        button { 
+            padding: 15px; border: none; border-radius: 10px; font-weight: 700; 
+            cursor: pointer; transition: 0.3s; font-family: 'Orbitron', sans-serif; text-transform: uppercase;
+        }
+        .btn-p { background: var(--grad); color: #000; width: 100%; }
+        .btn-outline { background: transparent; border: 1px solid var(--p); color: var(--p); width: 100%; }
+        .btn-red { background: #ea3943; color: white; width: 100%; }
+        .btn-green { background: #00c853; color: white; width: 100%; }
         .btn-yellow { background: var(--accent); color: black; }
-        .btn-red { background: #ea3943; color: white; }
-        .btn-green { background: #00c853; color: white; }
-        .console { background: #000; color: #00ff00; padding: 15px; height: 100px; overflow-y: auto; border-radius: 8px; font-family: monospace; font-size: 12px; margin-top: 10px; border: 1px solid #333; }
-        .live-pulse { height: 8px; width: 8px; background: #ea3943; border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        
         .hidden { display: none !important; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px;}
-        th { text-align: left; padding: 12px; background: #0b0e11; color: var(--p); }
-        td { padding: 12px; border-bottom: 1px solid #2b2f36; }
+        .rank-badge { background: var(--accent); color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; font-size: 14px; }
+        .console { background: #000; color: #00ffa3; padding: 15px; height: 100px; overflow-y: auto; border-radius: 10px; font-family: monospace; font-size: 12px; margin-top: 20px; border: 1px solid #222; }
+
+        .live-dot { height: 8px; width: 8px; background: #ea3943; border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th { text-align: left; color: var(--p); padding: 12px; border-bottom: 2px solid #2b2f36; }
+        td { padding: 12px; border-bottom: 1px solid #1e2329; color: #fff; }
+
+        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="card header-card">
-        <h2 id="st_name">DigiexDefai Dashboard</h2>
-        <p id="walletDisplay">Please Connect MetaMask</p>
+        <h1 id="st_name">DigiexDefai Pro</h1>
+        <p id="walletDisplay" style="color: #848e9c;">Web3 Secure Connection Ready</p>
         <button class="btn-p" onclick="connect()" id="connBtn" style="max-width: 300px;">Connect Wallet</button>
+        <div id="rankDisplay" class="rank-badge hidden">Rank: Investor</div>
     </div>
 
     <div id="regSection" class="card hidden">
-        <h3>User Registration</h3>
-        <p style="font-size: 13px; color: #848e9c;">Aap system mein registered nahi hain. Kripya apna account banayein.</p>
-        <input type="text" id="regUser" placeholder="Choose Username (Min 3 chars)">
-        <input type="text" id="regRef" placeholder="Referral Username (Default: admin)">
-        <button class="btn-p" onclick="registerAccount()">Register Now</button>
+        <h2 style="text-align: center;">Account Registration</h2>
+        <p style="text-align: center; color: #848e9c;">Join the elite DeFi ecosystem</p>
+        <div style="max-width: 500px; margin: auto;">
+            <label>Create Username</label>
+            <input type="text" id="regUser" placeholder="Min 3 chars">
+            <label>Referrer Username</label>
+            <input type="text" id="regRef" placeholder="Referrer ID (Default: admin)">
+            <button class="btn-p" onclick="register()">Launch Account</button>
+        </div>
     </div>
 
     <div id="mainDashboard" class="hidden">
         <div class="card">
-            <h3>User Statistics <span style="font-size: 12px; color: #848e9c;"><span class="live-pulse"></span>LIVE DATA</span></h3>
-            <div class="main-stats">
-                <div class="stat-box"><span class="stat-label">Total Deposits</span><span class="stat-value" id="st_total_dep">0.00 <span>USDT</span></span></div>
-                <div class="stat-box" style="border-left: 3px solid var(--p);"><span class="stat-label">Active Deposit</span><span class="stat-value" id="st_active">0.00 <span>USDT</span></span></div>
-                <div class="stat-box"><span class="stat-label">Total Earned</span><span class="stat-value" id="st_total_earned">0.00 <span>USDT</span></span></div>
-                <div class="stat-box"><span class="stat-label">Total Withdrawn</span><span class="stat-value" id="st_total_withdrawn">0.00 <span>USDT</span></span></div>
-                <div class="stat-box" style="background: #162a22;"><span class="stat-label">Withdrawable ROI</span><span class="stat-value" id="st_withdrawable_roi" style="color: var(--p);">0.0000 <span>USDT</span></span></div>
-                <div class="stat-box"><span class="stat-label">Network Income</span><span class="stat-value" id="st_net_income">0.00 <span>USDT</span></span></div>
+            <div id="referralBox" style="margin-bottom: 25px; text-align: center; border-bottom: 1px solid #333; padding-bottom: 20px;">
+                <p style="font-size: 13px; color: var(--p); font-weight: bold;">YOUR REFERRAL LINK</p>
+                <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
+                    <input type="text" id="refLink" readonly style="max-width: 400px; margin: 0; text-align: center; height: 45px; border-color: var(--p);">
+                    <button class="btn-yellow" style="padding: 0 25px; height: 45px;" onclick="copyRef()">COPY</button>
+                </div>
             </div>
-            <button class="btn-yellow" onclick="fetchData()" style="margin-top: 15px; width: 100%;">Refresh Live Data</button>
+
+            <div class="main-stats">
+                <div class="stat-box">
+                    <span class="stat-label">TOTAL DEPOSITED</span>
+                    <span class="stat-value" id="st_total_dep">0.00 <span>USDT</span></span>
+                </div>
+                <div class="stat-box" style="border-left-color: var(--p);">
+                    <span class="stat-label">ACTIVE CAPITAL</span>
+                    <span class="stat-value" id="st_active">0.00 <span>USDT</span></span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">TOTAL EARNINGS</span>
+                    <span class="stat-value" id="st_total_earned">0.00 <span>USDT</span></span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label"><span class="live-dot"></span>LIVE WITHDRAWABLE ROI</span>
+                    <span class="stat-value" id="st_withdrawable_roi" style="color: var(--p);">0.0000 <span>USDT</span></span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">NETWORK INCOME</span>
+                    <span class="stat-value" id="st_net_income">0.00 <span>USDT</span></span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">TEAM MEMBERS</span>
+                    <span class="stat-value" id="st_team_count">0 <span>Users</span></span>
+                </div>
+            </div>
+            <button class="btn-outline" onclick="fetchData()" style="margin-top: 20px;">REFRESH DATA</button>
         </div>
 
-        <div class="main-stats">
+        <div class="grid-2">
             <div class="card">
-                <h3>Investment</h3>
-                <input type="number" id="depAmt" placeholder="Amount USDT">
-                <div class="btn-group">
+                <h3>Investment Port</h3>
+                <input type="number" id="depAmt" placeholder="Enter Amount (USDT)">
+                <div class="grid-2">
                     <button class="btn-outline" onclick="approve()">1. Approve</button>
                     <button class="btn-p" onclick="deposit()">2. Deposit</button>
                 </div>
+                <p style="font-size: 11px; color: #848e9c; margin-top: 10px;">Network: Polygon/BSC | Min: 1 USDT</p>
             </div>
+
             <div class="card">
-                <h3>Reward Operations</h3>
-                <div class="btn-group">
-                    <button class="btn-red" onclick="claimDaily()">Claim Daily</button>
-                    <button class="btn-green" onclick="compoundDaily()">Comp Daily</button>
+                <h3>Financial Hub</h3>
+                <div class="grid-2" style="margin-bottom: 10px;">
+                    <button class="btn-red" onclick="claimDaily()">Claim ROI</button>
+                    <button class="btn-green" onclick="compoundDaily()">Comp ROI</button>
+                </div>
+                <div class="grid-2">
                     <button class="btn-red" onclick="claimNetwork()">Claim Net</button>
                     <button class="btn-green" onclick="compoundNetwork()">Comp Net</button>
                 </div>
+                <button class="btn-outline" onclick="withdrawPrincipal()" style="width: 100%; margin-top: 15px; border-color: #ea3943; color: #ea3943;">EMERGENCY PRINCIPAL EXIT (-20%)</button>
             </div>
         </div>
 
         <div class="card">
-            <h3>Team Explorer (Level 1-25)</h3>
-            <div style="display: flex; gap: 10px;">
+            <h3>Network Matrix</h3>
+            <div class="grid-2" style="grid-template-columns: 2fr 1fr; align-items: center;">
                 <select id="levelSel" style="margin: 0;">
                     <script>for(let i=1; i<=25; i++) document.write(`<option value="${i}">Level ${i}</option>`);</script>
                 </select>
-                <button class="btn-p" onclick="loadTeam()" style="width: 150px;">Show Team</button>
+                <button class="btn-p" onclick="loadTeam()">Expand View</button>
             </div>
             <div style="overflow-x: auto;">
                 <table>
-                    <thead><tr><th>Username</th><th>Active Dep.</th><th>Status</th><th>Total Business</th></tr></thead>
-                    <tbody id="teamBody"><tr><td colspan="4" style="text-align:center;">Select level to view</td></tr></tbody>
+                    <thead><tr><th>MEMBER</th><th>ACTIVE DEP</th><th>TEAM STATUS</th><th>TOTAL BUSINESS</th></tr></thead>
+                    <tbody id="teamBody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <div class="console" id="log">System Ready...</div>
+    <div class="console" id="log">SYSTEM STATUS: ENCRYPTED...</div>
 </div>
 
 <script>
@@ -112,69 +192,76 @@
 
     const ABI = [
         "function register(string u, string r) external",
-        "function users(address) view returns (address referrer, string username, bool registered, uint256 joinDate, uint256 totalActiveDeposit, uint256 teamActiveDeposit, uint256 teamTotalDeposit, uint256 totalDeposited, uint256 totalWithdrawn)",
+        "function users(address) view returns (address referrer, string username, bool registered, uint256 joinDate, uint256 totalActiveDeposit, uint256 teamActiveDeposit, uint256 teamTotalDeposit, uint256 totalDeposited, uint256 totalWithdrawn, uint256 totalEarnings)",
         "function usersExtra(address) view returns (uint256 rewardsReferral, uint256 rewardsOnboarding, uint256 rewardsRank, uint256 reserveDailyCapital, uint256 reserveDailyROI, uint256 reserveNetwork, uint32 teamCount, uint32 directsCount, uint32 directsQuali, uint8 rank)",
         "function getLiveBalance(address uA) view returns (uint256 pendingROI, uint256 pendingCap)",
         "function deposit(uint256 a) external",
-        "function approve(address s, uint256 a) returns (bool)",
         "function claimDailyReward(uint256 a) external",
         "function compoundDailyReward(uint256 a) external",
         "function claimNetworkReward(uint256 a) external",
         "function compoundNetworkReward(uint256 a) external",
+        "function withdrawPrincipal() external",
+        "function getRankName(uint8 r) view returns (string)",
         "function getLevelTeamDetails(address _upline, uint256 _level) view returns (string[] names, address[] wallets, uint256[] joinDates, uint256[] activeDeps, uint256[] teamTotalDeps, uint256[] teamActiveDeps, uint256[] withdrawals)"
     ];
+
     const USDT_ABI = ["function approve(address s, uint256 a) returns (bool)"];
 
     let signer, contract, usdt, userAddress;
 
     function log(m, err = false) {
         const l = document.getElementById("log");
-        l.innerHTML += `<div style="color:${err ? '#ff5252' : '#00ff00'}">> ${m}</div>`;
+        l.innerHTML += `<div style="color:${err ? '#ff5252' : '#00ffa3'}">> ${m}</div>`;
         l.scrollTop = l.scrollHeight;
     }
 
     async function connect() {
-        if(!window.ethereum) return alert("Install MetaMask");
+        if(!window.ethereum) return alert("Please install MetaMask");
         try {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
             signer = provider.getSigner();
             userAddress = await signer.getAddress();
-            
             contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
             usdt = new ethers.Contract(USDT_ADDR, USDT_ABI, signer);
 
-            document.getElementById("walletDisplay").innerText = "Address: " + userAddress.substring(0,6)+"..."+userAddress.substring(38);
             document.getElementById("connBtn").classList.add("hidden");
+            document.getElementById("walletDisplay").innerText = "WALLET ACTIVE: " + userAddress.substring(0,6)+"..."+userAddress.substring(38);
             
-            checkStatus();
+            const u = await contract.users(userAddress);
+            if(u.registered) {
+                showDashboard();
+            } else {
+                showRegistration();
+            }
         } catch (e) { log(e.message, true); }
     }
 
-    async function checkStatus() {
-        const u = await contract.users(userAddress);
-        if(u.registered) {
-            document.getElementById("regSection").classList.add("hidden");
-            document.getElementById("mainDashboard").classList.remove("hidden");
-            fetchData();
-            setInterval(fetchData, 15000);
-        } else {
-            document.getElementById("regSection").classList.remove("hidden");
-            document.getElementById("mainDashboard").classList.add("hidden");
-        }
+    function showRegistration() {
+        document.getElementById("regSection").classList.remove("hidden");
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('ref')) document.getElementById("regRef").value = urlParams.get('ref');
+        log("Wallet connected. Account not found. Registration required.");
     }
 
-    async function registerAccount() {
+    async function register() {
         const user = document.getElementById("regUser").value;
         const ref = document.getElementById("regRef").value || "admin";
-        if(user.length < 3) return alert("Username too short");
+        if(user.length < 3) return alert("Username min 3 chars");
         try {
-            log("Registering...");
+            log("Transmitting registration data...");
             const tx = await contract.register(user, ref);
             await tx.wait();
-            log("Registration Success!");
-            checkStatus();
-        } catch(e) { log(e.message, true); }
+            log("✅ Account Activated!");
+            showDashboard();
+        } catch (e) { log(e.message, true); }
+    }
+
+    function showDashboard() {
+        document.getElementById("regSection").classList.add("hidden");
+        document.getElementById("mainDashboard").classList.remove("hidden");
+        fetchData();
+        setInterval(fetchData, 15000); // 15s refresh for live ROI
     }
 
     async function fetchData() {
@@ -182,31 +269,40 @@
             const u = await contract.users(userAddress);
             const ex = await contract.usersExtra(userAddress);
             const live = await contract.getLiveBalance(userAddress);
+            const rName = await contract.getRankName(ex.rank);
 
-            // Calculation Logic (Aapka original logic)
-            const totalWithdrawable = live.pendingROI.add(live.pendingCap);
-            const netReward = ex.rewardsReferral.add(ex.rewardsOnboarding).add(ex.rewardsRank).add(ex.reserveNetwork);
-            const totalEarned = u.totalWithdrawn.add(totalWithdrawable).add(netReward);
+            // Logic Merge: ROI Calculation
+            const liveWithdrawable = live.pendingROI.add(live.pendingCap);
+            const networkTotal = ex.rewardsReferral.add(ex.rewardsOnboarding).add(ex.rewardsRank).add(ex.reserveNetwork);
 
-            document.getElementById("st_name").innerText = "Welcome, " + u.username;
-            document.getElementById("st_active").innerText = ethers.utils.formatEther(u.totalActiveDeposit);
+            document.getElementById("st_name").innerText = "HELLO, " + u.username;
             document.getElementById("st_total_dep").innerText = ethers.utils.formatEther(u.totalDeposited);
-            document.getElementById("st_total_withdrawn").innerText = ethers.utils.formatEther(u.totalWithdrawn);
-            document.getElementById("st_withdrawable_roi").innerText = parseFloat(ethers.utils.formatEther(totalWithdrawable)).toFixed(6);
-            document.getElementById("st_net_income").innerText = ethers.utils.formatEther(netReward);
-            document.getElementById("st_total_earned").innerText = parseFloat(ethers.utils.formatEther(totalEarned)).toFixed(4);
+            document.getElementById("st_active").innerText = ethers.utils.formatEther(u.totalActiveDeposit);
+            
+            // Total Earned = Withdrawn + Pending + Network
+            const totalEarnedCalc = u.totalWithdrawn.add(liveWithdrawable).add(networkTotal);
+            document.getElementById("st_total_earned").innerText = parseFloat(ethers.utils.formatEther(totalEarnedCalc)).toFixed(4);
+            
+            document.getElementById("st_withdrawable_roi").innerText = parseFloat(ethers.utils.formatEther(liveWithdrawable)).toFixed(6);
+            document.getElementById("st_net_income").innerText = ethers.utils.formatEther(networkTotal);
+            document.getElementById("st_team_count").innerText = ex.teamCount;
+            
+            document.getElementById("rankDisplay").innerText = "Rank: " + rName;
+            document.getElementById("rankDisplay").classList.remove("hidden");
+            
+            document.getElementById("refLink").value = window.location.origin + window.location.pathname + "?ref=" + u.username;
         } catch (e) { console.error(e); }
     }
 
     async function loadTeam() {
         const lvl = document.getElementById("levelSel").value;
         const body = document.getElementById("teamBody");
-        body.innerHTML = "<tr><td colspan='4'>Scanning Level " + lvl + "...</td></tr>";
+        body.innerHTML = "<tr><td colspan='4'>Scanning Network...</td></tr>";
         try {
             const data = await contract.getLevelTeamDetails(userAddress, lvl);
             body.innerHTML = "";
             if(data.names.length == 0) {
-                body.innerHTML = "<tr><td colspan='4'>No members found.</td></tr>";
+                body.innerHTML = "<tr><td colspan='4' style='text-align:center'>No members at Level " + lvl + "</td></tr>";
                 return;
             }
             for(let i=0; i<data.names.length; i++) {
@@ -217,37 +313,57 @@
                     <td>${ethers.utils.formatEther(data.teamTotalDeps[i])} USDT</td>
                 </tr>`;
             }
-        } catch(e) { log("Team Fetch Error", true); }
+        } catch(e) { log("Sync error", true); }
     }
 
-    async function approve() { 
+    async function approve() {
         try {
             const val = document.getElementById("depAmt").value;
+            if(!val) return alert("Enter amount");
             const amt = ethers.utils.parseEther(val);
-            log("Approving USDT...");
+            log("Requesting USDT Approval...");
             const tx = await usdt.approve(CONTRACT_ADDR, amt);
             await tx.wait();
-            log("✅ Approved!");
+            log("✅ Permission Granted!");
         } catch(e) { log(e.message, true); }
     }
 
-    async function deposit() { 
+    async function deposit() {
         try {
             const val = document.getElementById("depAmt").value;
             const amt = ethers.utils.parseEther(val);
-            log("Depositing...");
+            log("Initiating Deposit...");
             const tx = await contract.deposit(amt);
             await tx.wait();
-            log("✅ Success!");
+            log("✅ Success! Funds Secured.");
             fetchData();
         } catch(e) { log(e.message, true); }
     }
 
-    async function claimDaily() { const tx = await contract.claimDailyReward(0); await tx.wait(); fetchData(); }
-    async function compoundDaily() { const tx = await contract.compoundDailyReward(0); await tx.wait(); fetchData(); }
-    async function claimNetwork() { const tx = await contract.claimNetworkReward(0); await tx.wait(); fetchData(); }
-    async function compoundNetwork() { const tx = await contract.compoundNetworkReward(0); await tx.wait(); fetchData(); }
+    async function withdrawPrincipal() {
+        if(confirm("DANGER: This will exit your positions with a 20% penalty. Continue?")) {
+            try {
+                log("Executing Emergency Exit...");
+                const tx = await contract.withdrawPrincipal();
+                await tx.wait();
+                log("✅ Principal Withdrawn.");
+                fetchData();
+            } catch(e) { log(e.message, true); }
+        }
+    }
+
+    function copyRef() {
+        const copyText = document.getElementById("refLink");
+        copyText.select();
+        document.execCommand("copy");
+        log("Referral link copied to clipboard");
+    }
+
+    // Reward Logic Wrappers
+    async function claimDaily() { try { const tx = await contract.claimDailyReward(0); await tx.wait(); log("ROI Claimed!"); fetchData(); } catch(e) { log(e.message, true); } }
+    async function compoundDaily() { try { const tx = await contract.compoundDailyReward(0); await tx.wait(); log("ROI Compounded!"); fetchData(); } catch(e) { log(e.message, true); } }
+    async function claimNetwork() { try { const tx = await contract.claimNetworkReward(0); await tx.wait(); log("Network Bonus Claimed!"); fetchData(); } catch(e) { log(e.message, true); } }
+    async function compoundNetwork() { try { const tx = await contract.compoundNetworkReward(0); await tx.wait(); log("Network Bonus Compounded!"); fetchData(); } catch(e) { log(e.message, true); } }
 </script>
 </body>
 </html>
-
